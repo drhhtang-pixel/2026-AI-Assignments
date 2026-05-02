@@ -10,10 +10,13 @@ Each student's submission lives at `submissions/<學號-姓名>/` (e.g., `submis
 
 | File | Description | Limit |
 |------|-------------|-------|
-| `index.html` | Student's assignment entry point; must include a `<title>` tag | — |
 | `thumbnail.png` | Screenshot of the assignment | ≤ 500 KB |
+| `index.html` **(擇一)** | Static HTML assignment entry point; must include a `<title>` tag | — |
+| `url.txt` **(擇一)** | External deployment URL (Vercel / Netlify / GitHub Pages); one `https://` URL on the first line | — |
 
-Additional assets (CSS, JS, images) may be placed inside the same directory.
+`thumbnail.png` is always required. Include **either** `index.html` **or** `url.txt` — not necessarily both.
+
+Additional assets (CSS, JS, images) may be placed inside the same directory alongside `index.html`.
 
 ## Branch Protection Setup
 

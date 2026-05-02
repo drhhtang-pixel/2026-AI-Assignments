@@ -115,12 +115,31 @@ cd 2026-AI-Assignments</code></pre>
     <div class="step-num">4</div>
     <div class="step-body">
       <strong>建立作業目錄並放入必要檔案</strong>
-      在 <code>submissions/</code> 下建立以你的學號-姓名命名的目錄，放入兩個必要檔案：
+      在 <code>submissions/</code> 下建立以你的學號-姓名命名的目錄。<code>thumbnail.png</code> 必填，作業主檔<strong>擇一</strong>：
+      <table style="width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;">
+        <tr style="background:#f0f0f0;">
+          <th style="padding:6px 10px;text-align:left;border:1px solid #ddd;">選項</th>
+          <th style="padding:6px 10px;text-align:left;border:1px solid #ddd;">適用情境</th>
+          <th style="padding:6px 10px;text-align:left;border:1px solid #ddd;">檔案</th>
+        </tr>
+        <tr>
+          <td style="padding:6px 10px;border:1px solid #ddd;"><strong>A</strong></td>
+          <td style="padding:6px 10px;border:1px solid #ddd;">靜態 HTML 作業</td>
+          <td style="padding:6px 10px;border:1px solid #ddd;"><code>index.html</code>（需含 &lt;title&gt; 標籤）</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 10px;border:1px solid #ddd;"><strong>B</strong></td>
+          <td style="padding:6px 10px;border:1px solid #ddd;">已部署到 Vercel / Netlify / GitHub Pages</td>
+          <td style="padding:6px 10px;border:1px solid #ddd;"><code>url.txt</code>（第一行填 https:// 網址）</td>
+        </tr>
+      </table>
 <pre><code>submissions/
 └── M11234567-王小明/
-    ├── index.html      ← 作業網頁主檔（需含 &lt;title&gt; 標籤）
-    └── thumbnail.png   ← 作業截圖（≤ 500 KB）</code></pre>
-      其他輔助檔案（CSS、圖片等）可一併放在同一目錄。
+    ├── index.html      ← 選項 A：靜態 HTML（需含 &lt;title&gt; 標籤）
+    │   ─ 或 ─
+    ├── url.txt         ← 選項 B：填入 https://your-app.vercel.app
+    └── thumbnail.png   ← 必填：作業截圖（≤ 500 KB）</code></pre>
+      靜態 HTML 的其他輔助檔案（CSS、圖片等）可一併放在同一目錄。
     </div>
   </div>
 
@@ -165,6 +184,16 @@ git commit -m "add submission: M11234567-王小明"</code></pre>
 
   <!-- ── 4. 常見錯誤 ── -->
   <h2>四、常見錯誤與注意事項</h2>
+
+  <div class="error">
+    <strong>❌ 目錄內既無 index.html 也無 url.txt</strong><br>
+    CI 會拒絕此 PR 並顯示：<code>Submission must include either index.html or url.txt</code>。請確認你有放入其中一個檔案。
+  </div>
+
+  <div class="error">
+    <strong>❌ url.txt 內的網址不是 https://</strong><br>
+    CI 會拒絕此 PR 並顯示：<code>url.txt must contain a valid https:// URL</code>。請確認網址以 <code>https://</code> 開頭（不能是 <code>http://</code>）。
+  </div>
 
   <div class="error">
     <strong>❌ PR 修改到其他同學的檔案或根目錄檔案</strong><br>
