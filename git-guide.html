@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Git 工作流程說明 — 2026 AI 訓練課程</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f7; color: #333; line-height: 1.7; }
+    header { background: #1a1a2e; color: #fff; padding: 28px 24px 20px; }
+    header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    header p { font-size: 14px; color: #aaa; }
+    header a { color: #7eb8f7; font-size: 13px; text-decoration: none; }
+    header a:hover { text-decoration: underline; }
+    main { max-width: 860px; margin: 32px auto; padding: 0 20px 60px; }
+    h2 { font-size: 20px; font-weight: 700; color: #1a1a2e; margin: 36px 0 14px; padding-bottom: 6px; border-bottom: 2px solid #e0e0e0; }
+    h3 { font-size: 16px; font-weight: 600; margin: 22px 0 10px; color: #333; }
+    p { margin-bottom: 12px; }
+    ul, ol { padding-left: 22px; margin-bottom: 12px; }
+    li { margin-bottom: 6px; }
+    code { background: #eef; padding: 2px 6px; border-radius: 4px; font-size: 13px; font-family: "Courier New", monospace; color: #c0392b; }
+    pre { background: #1a1a2e; color: #e8e8e8; padding: 16px 20px; border-radius: 8px; margin: 12px 0 18px; overflow-x: auto; font-size: 13px; line-height: 1.5; }
+    pre code { background: none; color: inherit; padding: 0; font-size: 13px; }
+    .diagram { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px 24px; margin: 16px 0 24px; overflow-x: auto; }
+    .diagram pre { background: none; color: #333; padding: 0; margin: 0; font-size: 13px; }
+    .note { background: #fffbe6; border-left: 4px solid #f5a623; padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 14px 0; font-size: 14px; }
+    .error { background: #fff2f2; border-left: 4px solid #e74c3c; padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 14px 0; font-size: 14px; }
+    .step { display: flex; gap: 14px; margin-bottom: 20px; }
+    .step-num { flex-shrink: 0; width: 32px; height: 32px; background: #1a1a2e; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; margin-top: 2px; }
+    .step-body { flex: 1; }
+    .step-body strong { display: block; margin-bottom: 4px; font-size: 15px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Git 工作流程說明 — 2026 AI 訓練課程</h1>
+  <p>繳交作業前請先閱讀本頁。&nbsp; <a href="index.html">← 返回作業展示頁</a></p>
+</header>
+
+<main>
+
+  <!-- ── 1. 什麼是 Git ── -->
+  <h2>一、什麼是 Git？</h2>
+
+  <p>Git 是一套<strong>版本控制系統</strong>，讓多人可以同時修改同一個專案，又不會互相覆蓋彼此的工作。每一次你執行 <code>git commit</code>，就相當於幫你的檔案拍一張「快照」，之後可以隨時回溯。</p>
+
+  <p>GitHub 是放置 Git repo 的雲端平台，提供網頁介面來管理 commit、分支與合併（Pull Request）。</p>
+
+  <!-- ── 2. 工作流程圖 ── -->
+  <h2>二、本課程的工作流程</h2>
+
+  <div class="diagram">
+    <pre>
+  老師的 repo（drhhtang-pixel/2026-AI-Assignments）
+  ┌─────────────────────────────────────────────┐
+  │  main  ─────────────────────────────────▶  │  ← 受保護，禁止直接 push
+  └──────────┬──────────────────────▲───────────┘
+             │ Fork（複製一份到       │ Pull Request
+             │ 自己帳號）             │ 老師 Code Review → Merge
+             ▼                      │
+  你的 fork（你的帳號/2026-AI-Assignments）
+  ┌─────────────────────────────────────────────┐
+  │  main  ──→  submission/M11234567-王小明  ──▶ │
+  └─────────────────────────────────────────────┘
+             │ git clone 到本機
+             ▼
+  本機電腦
+  ├── submissions/M11234567-王小明/
+  │   ├── index.html
+  │   └── thumbnail.png
+  │
+  └── git add / commit / push
+             │
+             ▼
+  GitHub Actions 自動驗證 ──合格──▶ 老師審核 ──通過──▶ 合併到 main
+                                                          │
+                                                          ▼
+                                                  展示頁面自動更新
+    </pre>
+  </div>
+
+  <!-- ── 3. 逐步繳交說明 ── -->
+  <h2>三、逐步繳交說明</h2>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <strong>Fork 老師的 repo</strong>
+      前往 <a href="https://github.com/drhhtang-pixel/2026-AI-Assignments" target="_blank" rel="noopener">github.com/drhhtang-pixel/2026-AI-Assignments</a>，點擊右上角 <strong>Fork</strong> 按鈕，將 repo 複製到你自己的 GitHub 帳號。
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <strong>Clone 到本機</strong>
+      到你的 fork 頁面，點 <strong>Code → Copy URL</strong>，然後在終端機執行：
+<pre><code>git clone https://github.com/&lt;你的帳號&gt;/2026-AI-Assignments.git
+cd 2026-AI-Assignments</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <strong>建立繳交分支</strong>
+      分支名稱格式必須是 <code>submission/&lt;學號&gt;-&lt;姓名&gt;</code>：
+<pre><code>git checkout -b submission/M11234567-王小明</code></pre>
+      <div class="note">分支名稱裡的 <code>M11234567-王小明</code> 就是你的繳交目錄名稱，之後所有步驟保持一致。</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <strong>建立作業目錄並放入必要檔案</strong>
+      在 <code>submissions/</code> 下建立以你的學號-姓名命名的目錄，放入兩個必要檔案：
+<pre><code>submissions/
+└── M11234567-王小明/
+    ├── index.html      ← 作業網頁主檔（需含 &lt;title&gt; 標籤）
+    └── thumbnail.png   ← 作業截圖（≤ 500 KB）</code></pre>
+      其他輔助檔案（CSS、圖片等）可一併放在同一目錄。
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-body">
+      <strong>Stage 並 Commit</strong>
+<pre><code>git add submissions/M11234567-王小明/
+git commit -m "add submission: M11234567-王小明"</code></pre>
+      <div class="note"><code>git add</code> 把檔案加入「待提交清單」；<code>git commit</code> 建立快照。</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">6</div>
+    <div class="step-body">
+      <strong>Push 到你的 fork</strong>
+<pre><code>git push origin submission/M11234567-王小明</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">7</div>
+    <div class="step-body">
+      <strong>在 GitHub 開啟 Pull Request</strong>
+      Push 完後 GitHub 會顯示一個黃色提示列，點 <strong>Compare &amp; pull request</strong>。確認目標是：
+      <ul>
+        <li>Base repo：<code>drhhtang-pixel/2026-AI-Assignments</code></li>
+        <li>Base branch：<code>main</code></li>
+      </ul>
+      依照 PR 模板的確認清單逐項打勾後，點 <strong>Create pull request</strong>。
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">8</div>
+    <div class="step-body">
+      <strong>等待 CI 自動驗證與老師審核</strong>
+      PR 提交後，GitHub Actions 會自動執行 <code>validate-submission</code> 檢查。檢查通過後等候老師的 Code Review。老師核准（Approve）並 Merge 後，作業即自動出現在展示頁面。
+    </div>
+  </div>
+
+  <!-- ── 4. 常見錯誤 ── -->
+  <h2>四、常見錯誤與注意事項</h2>
+
+  <div class="error">
+    <strong>❌ PR 修改到其他同學的檔案或根目錄檔案</strong><br>
+    你的 PR 只能包含 <code>submissions/&lt;你的學號-姓名&gt;/</code> 目錄內的變更。若 PR 同時修改了 <code>README.md</code>、<code>scripts/</code>、或其他同學的目錄，CI 會直接失敗。
+  </div>
+
+  <div class="error">
+    <strong>❌ 目錄命名不正確</strong><br>
+    目錄名稱必須是 <code>&lt;學號&gt;-&lt;姓名&gt;</code> 格式，以連字號（<code>-</code>）分隔，姓名中間不能有空格。
+    <ul style="margin-top:8px;">
+      <li>✅ 正確：<code>M11234567-王小明</code>、<code>B10901234-AliceWang</code></li>
+      <li>❌ 錯誤：<code>M11234567_王小明</code>（底線）、<code>M11234567 王小明</code>（空格）、<code>homework1</code>（無學號）</li>
+    </ul>
+  </div>
+
+  <div class="error">
+    <strong>❌ thumbnail.png 超過 500 KB</strong><br>
+    截圖請在存檔時壓縮。建議解析度 800×600 px 以內，PNG 或 JPG 皆可（但檔名必須是 <code>thumbnail.png</code>）。
+  </div>
+
+  <div class="error">
+    <strong>❌ index.html 缺少 &lt;title&gt; 標籤</strong><br>
+    展示頁面會從 <code>&lt;title&gt;</code> 抓取標題顯示在卡片上。請確認你的 <code>index.html</code> 包含如下標籤：<br>
+    <code>&lt;title&gt;我的作業名稱&lt;/title&gt;</code>
+  </div>
+
+  <div class="error">
+    <strong>❌ 直接 push 到 main</strong><br>
+    <code>main</code> 分支有保護，你無法直接 push。請務必先建立 <code>submission/&lt;學號-姓名&gt;</code> 分支再 push，並透過 PR 繳交。
+  </div>
+
+</main>
+</body>
+</html>
