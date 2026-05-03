@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Color palette preview — 預算案儀表板</title>
+  <link rel="stylesheet" href="styles_vs.css" />
+  <style>
+    .preview-page { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+    .preview-page h1 { font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--primary-color); }
+    .preview-page .subtitle { color: var(--pen-color-text-muted); margin-bottom: 2rem; }
+    .palette-section { margin-bottom: 2.5rem; }
+    .palette-section h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--secondary-color); }
+    .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
+    .swatch { border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); }
+    .swatch__block { height: 72px; }
+    .swatch__label { padding: 8px 10px; background: var(--pen-color-surface); font-size: 0.8rem; color: var(--pen-color-text-muted); }
+    .swatch__label strong { display: block; color: var(--pen-color-text); margin-bottom: 2px; }
+    .swatch--light .swatch__label { background: #fff; }
+    .plan-box {
+      background: var(--pen-color-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--pencil-radius);
+      padding: var(--space-6);
+      margin-bottom: 2.5rem;
+      font-size: 0.9rem;
+    }
+    .plan-box h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--secondary-color); }
+    .plan-box h3 { font-size: 0.95rem; margin: 1.25rem 0 0.5rem; color: var(--primary-color); }
+    .plan-box p, .plan-box ul { color: var(--pen-color-text-muted); line-height: 1.6; margin: 0 0 0.5rem; }
+    .plan-box table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.85rem; }
+    .plan-box th, .plan-box td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--pen-color-text-muted); }
+    .plan-box th { color: var(--pen-color-text); font-weight: 600; }
+    .plan-box .anchor { color: var(--pen-color-pass); }
+    .swatch--light-bg { border: 2px solid var(--border-color); }
+    .swatch--dark .swatch__label::after { content: ' · 文字用 #fff'; font-size: 0.75rem; color: var(--pen-color-text-muted); display: block; margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <div class="preview-page">
+    <h1>Color palette preview</h1>
+    <p class="subtitle">預算案儀表板 — 設計系統色彩一覽</p>
+
+    <section class="plan-box" aria-label="Recommended palette plan">
+      <h2>Color palette plan (consistent, not messy)</h2>
+      <p>One blue family, one red family, one green for pass, one neutral scale. Many categories reuse the same hues (different lightness or role); only 3–4 color families + neutrals.</p>
+
+      <h3>1. Anchors (keep as-is)</h3>
+      <table>
+        <thead><tr><th>Token</th><th>Hex</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td class="anchor">Hero blue</td><td>#355899</td><td>Primary brand, CTAs</td></tr>
+          <tr><td>Hero blue soft / softer</td><td>#97b1de, #c3d4f0</td><td>Secondary emphasis, highlights</td></tr>
+          <tr><td class="anchor">Text</td><td>#1c1c1e, #636366</td><td>Primary and muted text</td></tr>
+          <tr><td class="anchor">Background & surface</td><td>#ffffff, #f7f8fb</td><td>Page bg, cards, panels</td></tr>
+          <tr><td class="anchor">Arrow red</td><td>#c76a6e</td><td>Data/story accent</td></tr>
+        </tbody>
+      </table>
+
+      <h3>2. Status (審查狀態)</h3>
+      <p>Cut #b84848, Freeze #5a8fc4, Pass #2a8f3e, Main resolution #1c1c1e. (pass-blue #5a8fc4 = chart/UI mid-blue, not “approved”; pass = green.)</p>
+
+      <h3>3. Chart diverging</h3>
+      <p>neg-2 #a82d3a, neg-1 #d4866a, zero #f7f8fb (surface), pos-1 #5a8fc4, pos-2 #2d5f9e.</p>
+
+      <h3>4. Category colors — don’t use one color per category</h3>
+      <p>Reuse <strong>3 families + neutrals</strong> so the UI stays clean. Group by meaning, then assign one hue (or gray) per group. Different categories can share the same hex; differentiate by label/context.</p>
+      <table>
+        <thead><tr><th>Family</th><th>Token / Hex</th><th>Budget categories (政事別)</th></tr></thead>
+        <tbody>
+          <tr><td>Blue (policy/core)</td><td>hero blue #355899, freeze #5a8fc4, hero soft #97b1de</td><td>一般政務, 經濟發展, 國防, 教育科學文化</td></tr>
+          <tr><td>Red/rose (people)</td><td>arrow red #c76a6e, cut #b84848</td><td>社會福利, 退休撫卹</td></tr>
+          <tr><td>Neutral</td><td>border #c7c7cc, surface #e5e5ea, muted #8e8e93</td><td>債務還本付息, 補助及其他, 其他</td></tr>
+          <tr><td>Env / 環境 (teal)</td><td>--pen-color-env #326d5e</td><td>社區發展及環境保護</td></tr>
+        </tbody>
+      </table>
+      <p>Applied mapping: 一般政務→#355899, 經濟發展→#5a8fc4, 國防→#97b1de, 教育科學文化→#7a9fcf; 社會福利→#c76a6e, 退休撫卹→#b84848; 社區發展及環境保護→#326d5e (teal); 補助及其他→#e5e5ea (略深灰，避免白底消失); 債務還本付息→#c7c7cc, 其他→#8e8e93.</p>
+
+      <h3>5. Usage & accessibility</h3>
+      <ul>
+        <li>Body text: --pen-color-text on bg/surface only. Hero blue and arrow red for emphasis/accents, not long copy.</li>
+        <li>CTA hover: hero-blue-soft or 10% darker hero blue.</li>
+        <li>Focus ring: e.g. 2px outline with --pen-color-hero-blue.</li>
+      </ul>
+
+      <h3>6. Summary (core tokens)</h3>
+      <table>
+        <thead><tr><th>Role</th><th>Variable</th><th>Hex</th></tr></thead>
+        <tbody>
+          <tr><td>Background</td><td>--pen-color-bg</td><td>#ffffff</td></tr>
+          <tr><td>Surface</td><td>--pen-color-surface</td><td>#f7f8fb</td></tr>
+          <tr><td>Text</td><td>--pen-color-text</td><td>#1c1c1e</td></tr>
+          <tr><td>Text muted</td><td>--pen-color-text-muted</td><td>#636366</td></tr>
+          <tr><td>Hero blue</td><td>--pen-color-hero-blue</td><td>#355899</td></tr>
+          <tr><td>Hero blue soft</td><td>--pen-color-hero-blue-soft</td><td>#97b1de</td></tr>
+          <tr><td>Hero blue softer</td><td>--pen-color-hero-blue-softer</td><td>#c3d4f0</td></tr>
+          <tr><td>Arrow red</td><td>--pen-color-arrow-red</td><td>#c76a6e</td></tr>
+          <tr><td>Cut</td><td>--pen-color-cut</td><td>#b84848</td></tr>
+          <tr><td>Freeze</td><td>--pen-color-freeze</td><td>#5a8fc4</td></tr>
+          <tr><td>Pass</td><td>--pen-color-pass</td><td>#2a8f3e</td></tr>
+          <tr><td>Border</td><td>--pen-color-border</td><td>#c7c7cc</td></tr>
+          <tr><td>Chart pos-2</td><td>--chart-diverging-pos-2</td><td>#2d5f9e</td></tr>
+          <tr><td>Chart zero</td><td>--chart-diverging-zero</td><td>#f7f8fb</td></tr>
+          <tr><td>Env / 環境</td><td>--pen-color-env</td><td>#326d5e</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Implementation:</strong> styles_vs.css: set tokens above (hero/status/party/chart + env). main_vs.js categoryColorMap: use hex values above (補助及其他 #e5e5ea, 社區發展及環境保護 #326d5e).</p>
+
+      <h3>7. Saturation / Lightness harmony</h3>
+      <p>Chromatic colors use one S band (≈40–55%) and 2–3 L levels (Dark 35–42%, Mid 50–58%, Light 70–78%) so the palette feels like one family. Neutrals unchanged.</p>
+      <table>
+        <thead><tr><th>Role</th><th>Hex (harmonized)</th><th>Level</th></tr></thead>
+        <tbody>
+          <tr><td>Hero blue</td><td>#355899</td><td>Dark</td></tr>
+          <tr><td>Cut</td><td>#b84848</td><td>Mid</td></tr>
+          <tr><td>Pass</td><td>#2a8f3e</td><td>Dark</td></tr>
+          <tr><td>Arrow red</td><td>#c76a6e</td><td>Mid</td></tr>
+          <tr><td>Freeze / pass-blue</td><td>#5a8fc4</td><td>Mid</td></tr>
+          <tr><td>Env teal</td><td>#326d5e</td><td>Dark</td></tr>
+          <tr><td>Chart pos-2</td><td>#2d5f9e</td><td>Dark</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Review status, Party, Chart diverging</strong> aligned to same S/L (not too strong):</p>
+      <table>
+        <thead><tr><th>Group</th><th>Token</th><th>Hex (aligned)</th></tr></thead>
+        <tbody>
+          <tr><td>Review status</td><td>cut, freeze, pass, arrow-red</td><td>#b84848, #5a8fc4, #2a8f3e, #c76a6e</td></tr>
+          <tr><td>Party</td><td>KMT, DPP, TPP, NPP, other</td><td>#354899, #2a8f3e, #4a9e9e, #c9a227, #8e8e93</td></tr>
+          <tr><td>Chart diverging</td><td>neg-2, neg-1, zero, pos-1, pos-2</td><td>#a82d3a, #d4866a, #f7f8fb, #5a8fc4, #2d5f9e</td></tr>
+        </tbody>
+      </table>
+
+      <h3>8. 優化建議 (Optimization suggestions)</h3>
+      <ul>
+        <li><strong>「其他」過多：</strong>畫面上同時出現「補助及其他」與「其他」兩類易混淆。若數據量不大可考慮合併；若並存，在視覺上給予更明顯區隔（例如邊框、標籤或圖例說明），避免使用者混淆。</li>
+        <li><strong>環境保護的顏色：</strong>「社區發展及環境保護」目前用深黑 #1c1c1e，在預算視覺化中偏重。環境保護常聯想綠/青，可從藍色系微調出一組綠色調（例如青綠 #326d5e），讓該項支出更易辨識且語意一致。</li>
+        <li><strong>#f4f6f8 對比：</strong>「補助及其他」的背景色 #f4f6f8 非常淡，若網頁背景也是白，該區塊可能「消失」。建議改為略深的灰（如 #e5e5ea）或在使用處加邊框/線條以維持辨識度。</li>
+        <li><strong>深色背景上的文字對比：</strong>深藍 #355899（或 chart pos-2 #2d5f9e）和深灰 #1c1c1e 上的文字須確保對比度（Accessibility）。小字或手機上建議以 4.5:1 為目標並實機檢查，必要時略加深背景或加粗字體。</li>
+      </ul>
+
+      <h3>9. AccessLint-style a11y checklist</h3>
+      <ul>
+        <li><strong>Form labels</strong>: inputs need a visible <code>&lt;label&gt;</code> or <code>aria-label</code> (e.g. budget search input).</li>
+        <li><strong>Link purpose</strong>: avoid generic “更多/詳情” links without context; make destination clear.</li>
+        <li><strong>Color-only cues</strong>: status/party/chart must not rely on color alone; always pair with text/icon/label.</li>
+        <li><strong>Contrast</strong>: target ≥4.5:1 for body text and ≥3:1 for large UI; re-check after palette updates.</li>
+        <li><strong>Keyboard & focus</strong>: ensure focus-visible ring is always visible, modals trap focus, and skip link works.</li>
+        <li><strong>Reduced motion</strong>: respect <code>prefers-reduced-motion</code> for animated transitions.</li>
+      </ul>
+    </section>
+
+    <section class="palette-section">
+      <h2>Background & surface</h2>
+      <div class="swatch-grid">
+        <div class="swatch swatch--light"><div class="swatch__block" style="background: var(--pen-color-bg);"></div><div class="swatch__label"><strong>pen-color-bg</strong>#ffffff</div></div>
+        <div class="swatch"><div class="swatch__block" style="background: var(--pen-color-surface);"></div><div class="swatch__label"><strong>pen-color-surface</strong>#f7f8fb</div></div>
+        <div class="swatch"><div class="swatch__block" style="background: var(--pen-color-surface-elevated);"></div><div class="swatch__label"><strong>surface-elevated</strong>#ffffff</div></div>
+        <div class="swatch"><div class="swatch__block" style="background: var(--bg-tertiary);"></div><div class="swatch__label"><strong>bg-tertiary</strong>#e5e5ea</div></div>
+      </div>
+    </section>
+
+    <section class="palette-section">
+      <h2>Text</h2>
+      <p class="palette-note" style="font-size:0.8rem; color:var(--pen-color-text-muted); margin-bottom:0.5rem;">深色塊上文字請用 #fff，實機檢查對比 ≥4.5:1</p>
+      <div class="swatch-grid">
+        <div class="swatch swatch--dark"><div class="swatch__block" style="background: var(--pen-color-text);"></div><div class="swatch__label"><strong>pen-color-text</strong>#1c1c1e</div></div>
+        <div class="swatch"><div class="swatch__block" style="background: var(--pen-color-text-muted);"></div><div class="swatch__label"><strong>pen-color-text-muted</strong>#636366</div></div>
+        <div class="swatch"><div class="swatch__block" style="background: var(--pencil-nav-title);"></div><div class="swatch__label"><strong>pencil-nav-title</strong>#f2f2f7</div></div>
+      </div>
+    </section>
+
+    <section class="palette-section">
+      <h2>Hero blue</h2>
+      <p class="palette-note" style="font-size:0.8rem; color:var(--pen-color-text-muted); margin-bottom:0.5rem;">深色塊上文字請用 #fff，實機檢查對比 ≥4.5:1</p>
+      <div class="swatch-grid">
+        <div class="swatch swatch--dark"><div class="swatch__block" style="background: var(--pen-color-hero-blue);"></div><div class="swatch__label"><strong>hero-blue</strong>#355899</div></div>
+        <div class="swatch"><div class="swatch__block" style="background: var(--pen-color-hero-blue-soft);"></div><div class="swatch__label"><strong>hero-blue-soft</strong>#97b1de</div></div>
+        <div class="swatch"><div class="swatch__block" style="background: var(--pen-color-hero-blue-softer);"></div><div class="swatch__label"><strong>hero-blue-softer</strong>#c3d4f0</div></div>
+      </div>
+    </section>
+
+    <section class="palette-section">
+      <h2>Review status（審查狀態）</h2>
+      <p class="palette-note" style="font-size:0.8rem; color:var(--pen-color-text-muted); margin-bottom:0.5rem;">S/L aligned — 與 Harmonized / Budget categories 一致</p>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="swatch__block" style="background:#b84848;"></div><div class="swatch__label"><strong>cut 刪減</strong>#b84848</div></div>
+        <div class="swatch"><div class="swatch__block" style="background:#5a8fc4;"></div><div class="swatch__label"><strong>freeze 凍結</strong>#5a8fc4</div></div>
+        <div class="swatch"><div class="swatch__block" style="background:#2a8f3e;"></div><div class="swatch__label"><strong>pass 通過</strong>#2a8f3e</div></div>
+        <div class="swatch"><div class="swatch__block" style="background:#1c1c1e;"></div><div class="swatch__label"><strong>main-resolution</strong>#1c1c1e</div></div>
+        <div class="swatch"><div class="swatch__block" style="background:#c76a6e;"></div><div class="swatch__label"><strong>arrow-red</strong>#c76a6e</div></div>
+      </div>
+    </section>
+
+    <section class="palette-section">
+      <h2>Party（政黨）</h2>
+      <p class="palette-note" style="font-size:0.8rem; color:var(--pen-color-text-muted); margin-bottom:0.5rem;">S/L aligned — 與 Harmonized / Budget categories 一致</p>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="swatch__block" style="background:#354899;"></div><div class="swatch__label"><strong>KMT</strong>#354899</div></div>
+        <div class="swatch"><div class="swatch__block" style="background:#2a8f3e;"></div><div class="swatch__label"><strong>DPP</strong>#2a8f3e</div></div>
+        <div class="swatch"><div class="swatch__block" style="background:#4a9e9e;"></div><div class="swatch__label"><strong>TPP</strong>#4a9e9e</div></div>
+        <div class="swatch"><div class="swatch__block" style="background:#c9a227;"></div><div class="swatch__label"><strong>NPP</strong>#c9a227</div></div>
+        <div class="swatch"><div class="swatch__block" style="background:#8e8e93;"></div><div class="swatch__label"><strong>other</strong>#8e8e93</div></div>
+      </div>
+    </section>
+
+    <section class="palette-section">
+      <h2>Chart diverging（紅↔中性↔藍）</h2>
+      <p class="palette-note" style="font-size:0.8rem; color:var(--pen-color-text-muted); margin-bottom:0.5rem;">S/L aligned — 與 Harmonized / Budget categories 一致</p>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="swatch__block" style="background:#a82d3a;"></div><div class="swatch__label"><strong>neg-2</strong>#a82d3a</div></div>
+        <div class="swatch"><div class="swatch__block" style="background:#d4866a;"></div><div class="swatch__label"><strong>neg-1</strong>#d4866a</div></div>
+        <div class="swatch"><div class="swatch__block" style="background:#f7f8fb;"></div><div class="swatch__label"><strong>zero</strong>#f7f8fb</div></div>
+        <div class="swatch"><div class="swatch__block" style="background:#5a8fc4;"></div><div class="swatch__label"><strong>pos-1</strong>#5a8fc4</div></div>
+        <div class="swatch"><div class="swatch__block" style="background:#2d5f9e;"></div><div class="swatch__label"><strong>pos-2</strong>#2d5f9e</div></div>
+      </div>
+    </section>
+
+    <section class="palette-section">
+      <h2>UI & borders</h2>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="swatch__block" style="background: var(--pen-color-border);"></div><div class="swatch__label"><strong>border</strong>#c7c7cc</div></div>
+        <div class="swatch"><div class="swatch__block" style="background: var(--pen-color-pass-blue);"></div><div class="swatch__label"><strong>pass-blue</strong>#5a8fc4</div></div>
+        <div class="swatch"><div class="swatch__block" style="background: var(--pen-color-freeze-blue);"></div><div class="swatch__label"><strong>freeze-blue</strong>#97b1de</div></div>
+        <div class="swatch"><div class="swatch__block" style="background: var(--pencil-light-freeze);"></div><div class="swatch__label"><strong>pencil-light-freeze</strong>#aac8df</div></div>
+      </div>
+    </section>
+
+    <section class="palette-section">
+      <h2>Harmonized palette (S/L aligned)</h2>
+      <p class="palette-note" style="font-size:0.8rem; color:var(--pen-color-text-muted); margin-bottom:0.5rem;">Chromatic tokens with similar saturation (≈40–55%) and clear lightness levels. Use these hex values in CSS/JS for a consistent look.</p>
+      <div class="swatch-grid" id="harmonized-swatches"></div>
+    </section>
+
+    <section class="palette-section">
+      <h2>Budget categories（預算類別 — main_vs.js）</h2>
+      <p class="palette-note" style="font-size:0.8rem; color:var(--pen-color-text-muted); margin-bottom:0.5rem;">「補助及其他」與「其他」易混淆，建議於 UI 合併或加邊框/圖例區隔。淺色塊已加邊框以利辨識。色彩已套用 S/L 和諧。</p>
+      <div class="swatch-grid" id="budget-categories"></div>
+    </section>
+  </div>
+  <script>
+    const HARMONIZED = [
+      { name: 'Hero blue', hex: '#355899' },
+      { name: 'Hero soft', hex: '#97b1de' },
+      { name: 'Hero softer', hex: '#c3d4f0' },
+      { name: 'Cut', hex: '#b84848' },
+      { name: 'Pass', hex: '#2a8f3e' },
+      { name: 'Arrow red', hex: '#c76a6e' },
+      { name: 'Freeze', hex: '#5a8fc4' },
+      { name: 'Env teal', hex: '#326d5e' },
+      { name: 'Chart pos-2', hex: '#2d5f9e' }
+    ];
+    const harmonizedEl = document.getElementById('harmonized-swatches');
+    if (harmonizedEl) {
+      HARMONIZED.forEach(function (item) {
+        const div = document.createElement('div');
+        div.className = 'swatch';
+        div.innerHTML = '<div class="swatch__block" style="background:' + item.hex + ';"></div><div class="swatch__label"><strong>' + item.name + '</strong>' + item.hex + '</div>';
+        harmonizedEl.appendChild(div);
+      });
+    }
+    const CAT_COLORS = {
+      '社會福利': '#c76a6e',
+      '教育科學文化': '#7a9fcf',
+      '國防': '#97b1de',
+      '經濟發展': '#5a8fc4',
+      '一般政務': '#355899',
+      '退休撫卹': '#b84848',
+      '債務還本付息': '#c7c7cc',
+      '補助及其他': '#e5e5ea',
+      '社區發展及環境保護': '#326d5e',
+      '其他': '#8e8e93'
+    };
+    const LIGHT_SWATCH_IDS = ['補助及其他', '其他'];
+    const el = document.getElementById('budget-categories');
+    for (const [name, hex] of Object.entries(CAT_COLORS)) {
+      const div = document.createElement('div');
+      div.className = 'swatch' + (LIGHT_SWATCH_IDS.includes(name) ? ' swatch--light-bg' : '');
+      div.innerHTML = `<div class="swatch__block" style="background:${hex};"></div><div class="swatch__label"><strong>${name}</strong>${hex}</div>`;
+      el.appendChild(div);
+    }
+  </script>
+</body>
+</html>

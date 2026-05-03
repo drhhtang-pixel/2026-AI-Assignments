@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>更多資訊 — 中央政府總預算觀測站</title>
+    <meta name="description" content="更多資訊頁：整理中央政府總預算案相關新聞連結、資料來源與誤差說明，以及如何使用預算觀測站查詢預算與立委提案紀錄。">
+    <link rel="canonical" href="other.html">
+    <meta property="og:title" content="更多資訊 — 中央政府總預算觀測站">
+    <meta property="og:description" content="了解預算資料來源與可能誤差，並查看如何使用中央政府總預算觀測站查詢預算與立委把關紀錄。">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="更多資訊 — 中央政府總預算觀測站">
+    <meta name="twitter:description" content="查看相關新聞、資料來源與使用方式，深入理解115年度中央政府總預算案專題。">
+    <link rel="icon" href="data:,">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./styles_vs.css?v=177">
+</head>
+
+<body class="page page-other">
+
+    <a href="#main-content" class="skip-link">跳至主內容</a>
+
+    <div id="loader" class="loading-overlay js-loader" style="display:none;">
+        <div class="spinner"></div>
+        <p style="margin-top:var(--space-5); color:#8e8e93; font-weight:500; font-size:0.9375rem;">資料讀取中，請稍候...</p>
+    </div>
+
+    <div id="error-display" class="loading-overlay js-error-display" style="display:none;">
+        <div class="error-message">
+            <h3>⚠️ 資料讀取失敗</h3>
+            <p>無法讀取資料。請確認你是用本機伺服器開啟（不要用 file://），且專案根目錄存在 <code>data_page_*.json</code>。</p>
+        </div>
+    </div>
+
+    <nav class="float-nav js-float-nav" aria-label="全站導覽">
+        <a href="index.html" class="float-nav__brand" aria-label="回到首頁">
+            <img class="float-nav__mark" src="./img/cna_logo.svg" alt="" aria-hidden="true" />
+            <span class="float-nav__title">總預算觀測站</span>
+        </a>
+        <button class="float-nav__menuBtn js-float-nav-menuBtn" type="button" aria-label="開啟頁面切換選單"
+            aria-expanded="false" aria-controls="float-nav-seg">
+            <span class="float-nav__menuIcon" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+            </span>
+        </button>
+        <div id="float-nav-seg" class="float-nav__seg" aria-label="頁面切換">
+            <a href="index.html" class="float-nav__btn js-nav-home">總覽</a>
+            <a href="budget.html" class="float-nav__btn js-nav-budget">查預算</a>
+            <a href="legislators.html" class="float-nav__btn js-nav-legislator">立委把關</a>
+            <a href="other.html" class="float-nav__btn js-nav-other nav-active" aria-current="page">更多資訊</a>
+        </div>
+    </nav>
+
+    <main id="main-content">
+        <section id="page-other" class="page-section active">
+
+            <div class="pen-section-head mt-2rem">
+                <div class="pen-divider"></div>
+                <div class="pen-head-row">
+                    <div class="pen-triangle"></div>
+                    <h3>相關新聞</h3>
+                </div>
+                <div class="pen-divider"></div>
+            </div>
+            <div class="card card--roomy mb-2_5rem">
+                <p class="article-text">中央社持續追蹤中央政府總預算案審查動態，以下為相關報導：</p>
+                <ul style="list-style:none; padding:0; margin:1.5rem 0 0;">
+                    <li style="margin-bottom:1rem;">
+                        <a href="https://www.cna.com.tw/topic/newstopic/3958.aspx" target="_blank" rel="noreferrer"
+                            style="color:var(--primary-color); font-weight:600; text-decoration:none; font-size:1.05rem;">
+                            📰 中央社「總預算案」專題報導
+                        </a>
+                        <p style="color:#666; font-size:0.9rem; margin-top:4px;">持續更新的總預算案相關新聞整理</p>
+                    </li>
+                </ul>
+                
+            </div>
+
+            <div class="pen-section-head">
+                <div class="pen-divider"></div>
+                <div class="pen-head-row">
+                    <div class="pen-triangle"></div>
+                    <h3>資料來源與誤差說明</h3>
+                </div>
+                <div class="pen-divider"></div>
+            </div>
+            <div class="card card--roomy mb-2_5rem">
+                <div class="article-text">
+                    <p>本站資料主要整理自<strong>立法院公報</strong>中各委員會、黨團協商及院會審查總預算案的相關紀錄。</p>
+                    <p>中央政府總預算包含成千上百工作計畫，我們依據立法院公報內容，嘗試計算各項工作計畫的刪凍金額，並分成工作計畫與立委兩個部分，讓讀者可以查詢關心的議題預算金額與工作內容，或了解各立委提案情形。</p>
+                    <p><strong>⚠️ 誤差提醒：</strong>目前呈現在網頁上的金額數字皆是透過立法院公報內容進行計算，可能出現誤差，最終法定預算金額仍依主計總處公布為主。</p>
+                </div>
+                <div style="margin-top:1.5rem; padding:1.2rem; background:var(--bg-color); border-radius:var(--pencil-radius); border:1px solid var(--border-color);">
+                    <h4 style="margin:0 0 0.8rem; color:var(--primary-color);">資料來源</h4>
+                    <ul style="margin:0; padding-left:1.2rem; color:#555; line-height:1.8;">
+                        <li>立法院公報（委員會審查紀錄、黨團協商紀錄、院會表決紀錄）</li>
+                        <li>行政院主計總處「中央政府總預算案」</li>
+                        <li>立法院議事暨公報資訊網</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pen-section-head">
+                <div class="pen-divider"></div>
+                <div class="pen-head-row">
+                    <div class="pen-triangle"></div>
+                    <h3>使用方式</h3>
+                </div>
+                <div class="pen-divider"></div>
+            </div>
+            <div class="card card--roomy mb-2_5rem">
+                <div class="article-text">
+                    <h4 style="color:var(--primary-color); margin-top:0;">如何查詢預算計畫？</h4>
+                    <p>前往「<a href="budget.html" style="color:var(--secondary-color); font-weight:600;">查預算</a>」頁面，你可以：</p>
+                    <ul style="padding-left:1.2rem; line-height:1.8;">
+                        <li>使用搜尋框輸入關鍵字（如「國防」、「潛艦」、「數位發展」）搜尋預算計畫</li>
+                        <li>透過「部會」及「機關」下拉選單篩選，查看各機關的審查結果比例</li>
+                        <li>點擊搜尋結果中的工作計畫，查看計畫內容、分支計畫、用途比例與審查刪凍結果</li>
+                    </ul>
+
+                    <h4 style="color:var(--primary-color);">如何查詢立委提案紀錄？</h4>
+                    <p>前往「<a href="legislators.html" style="color:var(--secondary-color); font-weight:600;">立委把關</a>」頁面，你可以：</p>
+                    <ul style="padding-left:1.2rem; line-height:1.8;">
+                        <li>依黨籍篩選委員</li>
+                        <li>點擊委員卡片，查看該委員的刪減案與凍結案提案紀錄及審查結果</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="donate" class="content-block">
+                <div class="pen-section-head">
+                    <div class="pen-divider"></div>
+                    <div class="pen-head-row">
+                        <div class="pen-triangle"></div>
+                        <h3>支持優質新聞</h3>
+                    </div>
+                    <div class="pen-divider"></div>
+                </div>
+                <div class="card donate-panel">
+                    <div class="donate-panel__grid">
+                        <div class="donate-panel__copy">
+                            <p class="donate-panel__title">你的支持，讓公共資訊更可被理解。</p>
+                            <p class="donate-panel__desc">
+                                這個資料整理與視覺化專題需要大量的人力與時間。若你覺得內容有幫助，歡迎透過捐款支持我們持續做出「看得懂」的新聞。
+                            </p>
+                        </div>
+                        <div class="donate-panel__actions">
+                            <a class="btn btn--primary donate-panel__btn" href="#" target="_blank" rel="noopener noreferrer">
+                                前往捐款頁
+                            </a>
+                            <a class="btn btn--outline donate-panel__btn" href="https://www.cna.com.tw/" target="_blank"
+                                rel="noopener noreferrer">
+                                回到中央社首頁
+                            </a>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-row">
+                <p data-i18n-key="footerContact">聯絡我們：service@cna.com.tw | 電話：(02)2505-1180</p>
+            </div>
+            <div class="footer-row">
+                <div class="footer-social-buttons">
+                    <a href="https://www.facebook.com/cnanewstaiwan/?locale=zh_TW" class="footer-social-btn" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                        </svg>
+                    </a>
+                    <a href="https://www.youtube.com/@CNA_Taiwan" class="footer-social-btn" aria-label="YouTube" target="_blank" rel="noopener noreferrer">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                    </a>
+                    <a href="https://www.instagram.com/cnanews_tw/" class="footer-social-btn" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                        </svg>
+                    </a>
+                    <a href="https://www.threads.com/@cnanews_tw?hl=zh-tw" class="footer-social-btn footer-social-btn-threads" aria-label="Threads" target="_blank" rel="noopener noreferrer">
+                        <img src="img/Threads_(app)_logo.svg" alt="Threads" class="threads-icon">
+                    </a>
+                    <a href="https://page.line.me/tiq8051j?oat_content=url&openQrModal=tru" class="footer-social-btn" aria-label="LINE官方帳號" target="_blank" rel="noopener noreferrer">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.086.766.062 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-row">
+                <p><a href="https://www.cna.com.tw/about/privacy.aspx" target="_blank" rel="noopener noreferrer" data-i18n-key="footerPrivacy">隱私權政策</a> | <a href="https://www.cna.com.tw/about/contact.aspx" target="_blank" rel="noopener noreferrer" data-i18n-key="footerTerms">服務條款</a></p>
+            </div>
+            <div class="footer-row">
+                <p data-i18n-key="footerCopyright">© 2026 中央通訊社版權所有</p>
+            </div>
+        </div>
+    </footer>
+
+    <button type="button" id="float-back-top" class="float-back-top js-float-back-top" aria-label="回到頁首"
+        title="回到頁首">↑</button>
+
+    <button type="button" class="tour-fab js-tour-start" aria-haspopup="dialog" aria-label="開啟功能導覽">
+        導覽
+    </button>
+
+    <script src="./vs-modules/dom-map.js" defer></script>
+    <script src="./vs-modules/navigation-state.js" defer></script>
+    <script src="./vs-modules/data-contract.js" defer></script>
+    <script src="./vs-modules/data-loader.js" defer></script>
+    <script src="./vs-modules/search-engine.js" defer></script>
+    <script src="./vs-modules/dashboard-renderers.js" defer></script>
+    <script src="./vs-modules/modal-renderers.js" defer></script>
+    <script src="./main_vs.js?v=181" defer></script>
+</body>
+
+</html>
