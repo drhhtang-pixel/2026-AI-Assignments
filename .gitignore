@@ -6,6 +6,10 @@ openspec/
 # Claude Code
 .claude/
 
+# Local-only diary / notes (never commit)
+DIARY.local.md
+*.local.md
+
 # macOS
 .DS_Store
 openspec/.vector-search.db*
