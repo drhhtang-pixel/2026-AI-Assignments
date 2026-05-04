@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Salem Hung | AI Empowered Portfolio</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Space Grotesk -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Space Grotesk', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              light: '#f4f4f2',
+              accent: '#d4d4cc',
+              dark: '#1a1a1a',
+            }
+          },
+          backdropBlur: {
+            xs: '2px',
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="dark-mode">
+body.dark-mode { background-color: #0f0f0f !important; color: #f4f4f2 !important; }
+body.dark-mode header { background: transparent; }
+body.dark-mode .glass-card { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: #f4f4f2; }
+body.dark-mode .glass-card:hover { background: rgba(255,255,255,0.1); }
+body.dark-mode footer { border-color: #2a2a2a; }
+body.dark-mode #menu-dropdown { background: #1a1a1a; }
+body.dark-mode #menu-dropdown a { color: #f4f4f2; }
+body.dark-mode #menu-dropdown a:hover { background: #2a2a2a; }
+body.dark-mode #menu-dropdown .border-t { border-color: #2a2a2a; }
+
+#nav-pill { position: relative; width: 300px; height: 44px; }
+#menu-slider {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  bottom: 4px;
+  border-radius: 9999px;
+  background: #d4d4cc;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  cursor: grab;
+  user-select: none;
+  transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.4s;
+  white-space: nowrap;
+  z-index: 10;
+}
+#menu-slider:active { cursor: grabbing; }
+#menu-slider.slid-right { left: calc(100% - 4px); transform: translateX(-100%); background: #f4f4f2; color: #1a1a1a; }
+#nav-text {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,0.7);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  transition: left 0.4s, right 0.4s, opacity 0.3s;
+  pointer-events: none;
+}
+#nav-text.text-left { right: auto; left: 16px; }
+</style>
+<style data-purpose="custom-glassmorphism">/* Custom glassmorphism effect to match the reference image's soft frosted look */
+.glass-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease
+    }
+.glass-card:hover {
+    transform: translatey(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.25)
+    }
+.hero-title {
+    letter-spacing: -0.04em
+    }
+/* Background image setup to mimic the organic rock element */
+.bg-organic-element {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuBGzniRM9EEkfc4ikiksDtmDjz8ySr6jWPSzf-CoOkAaR6i-HfvYkKcso0EjmSftrSOVx37DqUeDznpVlO05T3c4HIUKz4RPUpB5IUplKcEm6LESQbNuLAnkdsjGJpU0YE_bJ9MfUtwoFqtmtdexmEtk70v9K89sySZ62S0lcPxZpSWse8Cp-cWqGaE4bCzh3H1Acq0ZhfjOAQ3FuxBTFN4pxXPv9pVIOuDrzc3PIb47m-8VCDGxMdoKKYyUSPZd3hstvcaA7L7ZGE);
+    /* Neutral stone/rock texture */
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: 80% auto;
+    filter: grayscale(20%) contrast(90%);
+    opacity: 0.8;
+    z-index: -1
+    }</style>
+</head>
+<body class="bg-brand-light font-sans text-brand-dark min-h-screen selection:bg-brand-dark selection:text-white">
+<!-- BEGIN: MainHeader -->
+<header style="position:fixed;top:0;left:0;width:100%;z-index:50;" class="p-6 flex justify-between items-center">
+<!-- Logo/Name -->
+<div class="flex items-center gap-2" data-purpose="site-identity">
+<div class="w-8 h-8 bg-brand-dark rounded-full flex items-center justify-center">
+<span class="text-white text-xs font-bold">SH</span>
+</div>
+</div>
+<!-- Center Navigation -->
+<nav id="nav-pill" class="bg-brand-dark rounded-full p-1 shadow-lg" data-purpose="main-navigation">
+  <div id="menu-slider">Magic</div>
+  <span id="nav-text">Discover Innovations</span>
+</nav>
+<!-- Right Side Contact Button -->
+<div data-purpose="header-cta">
+<button onclick="document.getElementById('qr-modal').classList.remove('hidden')" class="border border-brand-dark rounded-full px-5 py-2 text-sm font-medium hover:bg-brand-dark hover:text-white transition-all flex items-center gap-2">
+<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        Connect
+      </button>
+</div>
+
+<!-- LINE QR Code Modal -->
+<div id="qr-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm" onclick="this.classList.add('hidden')">
+  <div class="bg-white rounded-3xl p-8 flex flex-col items-center gap-4 shadow-2xl" onclick="event.stopPropagation()">
+    <p class="font-bold text-lg">Add me on LINE</p>
+    <img src="line_qr.jpg" alt="LINE QR Code" class="w-56 h-56 object-contain rounded-xl"/>
+    <button onclick="document.getElementById('qr-modal').classList.add('hidden')" class="text-sm text-gray-400 hover:text-gray-700 transition-colors">Close</button>
+  </div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: HeroSection -->
+<main class="relative pt-32 pb-20 px-6 min-h-screen flex flex-col items-center">
+<!-- Title Area -->
+<section class="text-center mb-16 z-10" data-purpose="hero-copy">
+<h1 class="text-7xl md:text-9xl font-bold hero-title mb-4">Salem Hung</h1>
+<p class="text-xl md:text-2xl font-light opacity-70 tracking-wide uppercase">AI Empowered Portfolio</p>
+</section>
+<!-- Background Organic Graphic -->
+<div aria-hidden="true" class="absolute inset-0 bg-organic-element"></div>
+<!-- BEGIN: FeatureCardsContainer -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl mx-auto mt-auto relative z-20" data-purpose="portfolio-entries">
+<!-- Card 1: CV -->
+<a href="https://celadon-youtiao-2f602e.netlify.app/" target="_blank" class="glass-card rounded-3xl p-8 flex flex-col h-[400px] justify-between group cursor-pointer">
+<div class="space-y-4">
+<span class="text-xs font-semibold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full">Resources</span>
+<div class="py-10 flex justify-center">
+<svg class="w-16 h-16 group-hover:rotate-45 transition-transform duration-500" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 4V20M4 12H20" stroke="currentColor" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</div>
+<div>
+<h3 class="text-2xl font-bold uppercase mb-2">Salem Hung's CV</h3>
+<p class="text-sm opacity-80 leading-relaxed">
+            The intersection of human creativity and neural network optimization.
+          </p>
+</div>
+</a>
+<!-- Card 2: RAG -->
+<a href="https://huggingface.co/spaces/tienyuhung/UOID-Assistant" target="_blank" class="glass-card rounded-3xl p-8 flex flex-col h-[400px] justify-between group cursor-pointer">
+<div class="space-y-4 text-center">
+<span class="text-xs font-semibold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full">Management</span>
+<div class="py-10 flex justify-center">
+<svg class="w-16 h-16 group-hover:scale-110 transition-transform duration-500" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<rect height="12" rx="2" stroke="currentColor" stroke-width="2.5" width="12" x="6" y="6"></rect>
+<path d="M12 2V6M12 18V22M2 12H6M18 12H22" stroke="currentColor" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</div>
+<div class="text-center">
+<h3 class="text-2xl font-bold uppercase mb-2">RAG</h3>
+<p class="text-sm opacity-80 leading-relaxed">
+            Retrieval-Augmented Generation architectures for precision data synthesis.
+          </p>
+</div>
+</a>
+<!-- Card 3: Slides Share -->
+<a href="https://20260430test-lovat.vercel.app/" target="_blank" class="glass-card rounded-3xl p-8 flex flex-col h-[400px] justify-between group cursor-pointer">
+<div class="space-y-4 text-right">
+<span class="text-xs font-semibold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full">Development</span>
+<div class="py-10 flex justify-center">
+<svg class="w-16 h-16 group-hover:-rotate-45 transition-transform duration-500" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</div>
+<div class="text-right">
+<h3 class="text-2xl font-bold uppercase mb-2">Slides Share</h3>
+<p class="text-sm opacity-80 leading-relaxed">
+            Deconstructing complexity through visual narrative.
+          </p>
+</div>
+</a>
+</section>
+<!-- END: FeatureCardsContainer -->
+</main>
+<!-- END: HeroSection -->
+<!-- BEGIN: Footer -->
+<footer class="w-full py-12 px-6 border-t border-brand-accent mt-20" data-purpose="main-footer">
+<div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="text-sm opacity-60">
+        © 2026 Salem Hung. AI-Empowered Portfolio Design.
+      </div>
+<div class="flex gap-8 items-center" data-purpose="social-links">
+<a class="text-sm font-medium hover:underline" href="https://www.linkedin.com/in/salem-tien-yu-hung/" target="_blank">LinkedIn</a>
+<a class="text-sm font-medium hover:underline" href="https://github.com/tienyuhung" target="_blank">GitHub</a>
+<a class="text-sm font-medium hover:underline" href="mailto:tienyuhung@gmail.com">Email</a>
+</div>
+<div class="text-xs uppercase tracking-widest opacity-40">
+        Built with Precision
+      </div>
+</div>
+</footer>
+<!-- END: Footer -->
+<script>
+const slider = document.getElementById('menu-slider');
+const navText = document.getElementById('nav-text');
+let isDark = false;
+let dragging = false;
+let startX = 0;
+
+function activateDark() {
+  isDark = true;
+  dragging = false;
+  slider.classList.add('slid-right');
+  document.body.classList.add('dark-mode');
+  navText.classList.add('text-left');
+  navText.textContent = 'Develop Creativity';
+}
+
+function deactivateDark() {
+  isDark = false;
+  dragging = false;
+  slider.classList.remove('slid-right');
+  document.body.classList.remove('dark-mode');
+  navText.classList.remove('text-left');
+  navText.textContent = 'Discover Innovations';
+}
+
+// 只有按在 Magic 按鈕上才開始拖曳
+slider.addEventListener('mousedown', (e) => {
+  dragging = true;
+  startX = e.clientX;
+  e.preventDefault();
+  e.stopPropagation();
+});
+
+slider.addEventListener('touchstart', (e) => {
+  dragging = true;
+  startX = e.touches[0].clientX;
+  e.stopPropagation();
+}, { passive: true });
+
+// mousemove 只在 dragging 為 true 時有效
+window.addEventListener('mousemove', (e) => {
+  if (!dragging) return;
+  const diff = e.clientX - startX;
+  if (diff > 80 && !isDark) activateDark();
+  else if (diff < -80 && isDark) deactivateDark();
+});
+
+window.addEventListener('touchmove', (e) => {
+  if (!dragging) return;
+  const diff = e.touches[0].clientX - startX;
+  if (diff > 80 && !isDark) activateDark();
+  else if (diff < -80 && isDark) deactivateDark();
+}, { passive: true });
+
+window.addEventListener('mouseup', () => { dragging = false; });
+window.addEventListener('touchend', () => { dragging = false; });
+</script>
+</body></html>
