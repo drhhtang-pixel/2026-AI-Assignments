@@ -14,9 +14,8 @@ function fail(message) {
 // --- 1. Get changed files ---
 let changedFiles;
 try {
-  changedFiles = execSync('git diff --name-only origin/main...HEAD', { encoding: 'utf8' })
-    .trim()
-    .split('\n')
+  changedFiles = execSync('git diff -z --name-only origin/main...HEAD', { encoding: 'utf8' })
+    .split('\0')
     .filter(Boolean);
 } catch (e) {
   fail(`Could not determine changed files: ${e.message}`);
