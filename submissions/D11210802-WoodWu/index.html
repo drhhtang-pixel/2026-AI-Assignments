@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>&#20420;&#32645;&#26031;&#26041;&#22602;</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell" aria-label="&#20420;&#32645;&#26031;&#26041;&#22602;&#36938;&#25138;">
+      <section class="game-frame">
+        <header class="app-header">
+          <div class="title-block">
+            <h1>&#20420;&#32645;&#26031;&#26041;&#22602;</h1>
+          </div>
+          <div class="score-panel" aria-live="polite">
+            <span>&#20998;&#25976;</span>
+            <strong id="score">0</strong>
+          </div>
+          <div class="next-panel" aria-label="&#19979;&#19968;&#20491;&#26041;&#22602;">
+            <span>&#19979;&#19968;&#20491;</span>
+            <canvas id="next" width="72" height="52"></canvas>
+          </div>
+        </header>
+
+        <nav class="top-actions" aria-label="&#36938;&#25138;&#21151;&#33021;">
+          <button id="helpButton" type="button">&#35498;&#26126;</button>
+          <button id="pauseButton" type="button" disabled>&#26283;&#20572;</button>
+          <button id="restartButton" type="button">&#37325;&#38283;</button>
+        </nav>
+
+        <section class="play-stack">
+          <section class="board-panel" aria-label="&#36938;&#25138;&#21312;">
+            <canvas id="board" width="360" height="720"></canvas>
+            <div id="effectsLayer" class="effects-layer" aria-hidden="true"></div>
+            <div id="overlay" class="overlay is-visible">
+              <h2 id="overlayTitle">&#28310;&#20633;&#38283;&#22987;</h2>
+              <p id="overlayText">&#25353;&#38283;&#22987;&#36914;&#20837;&#36938;&#25138;&#12290;</p>
+              <button id="startButton" class="primary-button" type="button">&#38283;&#22987;</button>
+            </div>
+          </section>
+
+          <nav class="touch-controls" aria-label="&#25163;&#27231;&#35320;&#25511;&#25805;&#20316;">
+            <button type="button" data-command="left" aria-label="&#24038;&#31227;">&#8592;</button>
+            <button type="button" data-command="right" aria-label="&#21491;&#31227;">&#8594;</button>
+            <button type="button" data-command="rotate" aria-label="&#26059;&#36681;">&#8635;</button>
+            <button type="button" data-command="down" aria-label="&#21152;&#36895;&#19979;&#33853;">&#8595;</button>
+            <button type="button" data-command="drop" aria-label="&#30452;&#25509;&#33853;&#19979;">&#10515;</button>
+          </nav>
+        </section>
+      </section>
+    </main>
+
+    <script src="game.js"></script>
+  </body>
+</html>

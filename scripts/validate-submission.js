@@ -14,9 +14,8 @@ function fail(message) {
 // --- 1. Get changed files ---
 let changedFiles;
 try {
-  changedFiles = execSync('git diff --name-only origin/main...HEAD', { encoding: 'utf8' })
-    .trim()
-    .split('\n')
+  changedFiles = execSync('git diff -z --name-only origin/main...HEAD', { encoding: 'utf8' })
+    .split('\0')
     .filter(Boolean);
 } catch (e) {
   fail(`Could not determine changed files: ${e.message}`);
@@ -29,6 +28,9 @@ if (changedFiles.length === 0) {
 // --- 2. Identify touched submission directories ---
 const DIR_PATTERN = /^[A-Za-z0-9]+-\S+$/;
 
+// Files that may legitimately appear in a fork diff without being part of the submission
+const ALLOWED_OUTSIDE = new Set(['.gitignore']);
+
 const submissionDirs = new Set();
 const outsideFiles = [];
 
@@ -36,7 +38,7 @@ for (const f of changedFiles) {
   const match = f.match(/^submissions\/([^/]+)\//);
   if (match) {
     submissionDirs.add(match[1]);
-  } else {
+  } else if (!ALLOWED_OUTSIDE.has(f)) {
     outsideFiles.push(f);
   }
 }
