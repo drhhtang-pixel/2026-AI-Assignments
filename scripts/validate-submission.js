@@ -28,6 +28,9 @@ if (changedFiles.length === 0) {
 // --- 2. Identify touched submission directories ---
 const DIR_PATTERN = /^[A-Za-z0-9]+-\S+$/;
 
+// Files that may legitimately appear in a fork diff without being part of the submission
+const ALLOWED_OUTSIDE = new Set(['.gitignore']);
+
 const submissionDirs = new Set();
 const outsideFiles = [];
 
@@ -35,7 +38,7 @@ for (const f of changedFiles) {
   const match = f.match(/^submissions\/([^/]+)\//);
   if (match) {
     submissionDirs.add(match[1]);
-  } else {
+  } else if (!ALLOWED_OUTSIDE.has(f)) {
     outsideFiles.push(f);
   }
 }
