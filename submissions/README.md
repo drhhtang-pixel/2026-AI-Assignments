@@ -26,6 +26,7 @@ https://your-app.vercel.app
 ```
 
 - **第一行**：`https://` 開頭的完整網址（必填）
+- 按 Enter 換行
 - **第二行**：作品標題（選填；沒有填則顯示目錄名稱）
 
 ### thumbnail 格式
