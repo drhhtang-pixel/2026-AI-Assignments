@@ -115,7 +115,7 @@ cd 2026-AI-Assignments</code></pre>
     <div class="step-num">4</div>
     <div class="step-body">
       <strong>建立作業目錄並放入必要檔案</strong>
-      在 <code>submissions/</code> 下建立以你的學號-姓名命名的目錄。<code>thumbnail.png</code> 必填，作業主檔<strong>擇一</strong>：
+      在 <code>submissions/</code> 下建立以你的學號-姓名命名的目錄。<strong>截圖必填</strong>，作業主檔<strong>擇一</strong>：
       <table style="width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;">
         <tr style="background:#f0f0f0;">
           <th style="padding:6px 10px;text-align:left;border:1px solid #ddd;">選項</th>
@@ -130,15 +130,25 @@ cd 2026-AI-Assignments</code></pre>
         <tr>
           <td style="padding:6px 10px;border:1px solid #ddd;"><strong>B</strong></td>
           <td style="padding:6px 10px;border:1px solid #ddd;">已部署到 Vercel / Netlify / GitHub Pages</td>
-          <td style="padding:6px 10px;border:1px solid #ddd;"><code>url.txt</code>（第一行填 https:// 網址）</td>
+          <td style="padding:6px 10px;border:1px solid #ddd;"><code>url.txt</code>（見下方格式說明）</td>
         </tr>
       </table>
 <pre><code>submissions/
 └── M11234567-王小明/
-    ├── index.html      ← 選項 A：靜態 HTML（需含 &lt;title&gt; 標籤）
+    ├── index.html        ← 選項 A：靜態 HTML（需含 &lt;title&gt; 標籤）
     │   ─ 或 ─
-    ├── url.txt         ← 選項 B：填入 https://your-app.vercel.app
-    └── thumbnail.png   ← 必填：作業截圖（≤ 500 KB）</code></pre>
+    ├── url.txt           ← 選項 B：外部部署連結
+    └── thumbnail.png     ← 必填截圖（建議 PNG，亦可 JPG，≤ 500 KB）</code></pre>
+
+      <p><strong>url.txt 格式（選項 B）：</strong></p>
+<pre><code>https://your-app.vercel.app
+作品標題（選填，會顯示在 gallery 卡片上）</code></pre>
+      <ul style="font-size:14px;margin-top:6px;">
+        <li><strong>第一行</strong>：必填，網址必須以 <code>https://</code> 開頭</li>
+        <li><strong>第二行</strong>：選填，作品名稱；不填則 gallery 顯示你的目錄名稱</li>
+      </ul>
+
+      <p style="margin-top:12px;"><strong>截圖格式：</strong>建議使用 <code>thumbnail.png</code>（PNG 畫質較好）；若使用 <code>thumbnail.jpg</code> 亦可通過 CI，但會出現提醒建議改為 PNG。</p>
       靜態 HTML 的其他輔助檔案（CSS、圖片等）可一併放在同一目錄。
     </div>
   </div>
@@ -210,8 +220,10 @@ git commit -m "add submission: M11234567-王小明"</code></pre>
   </div>
 
   <div class="error">
-    <strong>❌ thumbnail.png 超過 500 KB</strong><br>
-    截圖請在存檔時壓縮。建議解析度 800×600 px 以內，PNG 或 JPG 皆可（但檔名必須是 <code>thumbnail.png</code>）。
+    <strong>❌ 截圖超過 500 KB</strong><br>
+    截圖請在存檔時壓縮。建議解析度 800×600 px 以內。<br>
+    接受的檔名：<code>thumbnail.png</code>（建議）、<code>thumbnail.jpg</code>、<code>thumbnail.jpeg</code>。<br>
+    若使用 JPG，CI 會通過但會顯示提醒：<code>WARNING: PNG format is recommended.</code>
   </div>
 
   <div class="error">
