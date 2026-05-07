@@ -12,11 +12,28 @@
 <body>
   <h1>範例作業 — AI 課程 2026</h1>
   <p>這是一個範例繳交目錄，供學生參考目錄結構與必要檔案。</p>
+
+  <h2>目錄結構</h2>
+  <pre><code>submissions/M11234567-王小明/
+├── thumbnail.png     ← 必填（建議 PNG，亦可 jpg/jpeg，≤ 500 KB）
+├── index.html        ← 選項 A：靜態 HTML（需含 &lt;title&gt; 標籤）
+└── url.txt           ← 選項 B：外部部署連結</code></pre>
+
+  <h2>url.txt 格式（選項 B）</h2>
+  <pre><code>https://your-app.vercel.app
+作品標題（選填，顯示於 gallery 卡片）</code></pre>
   <ul>
-    <li>目錄名稱格式：<code>submissions/&lt;學號&gt;-&lt;姓名&gt;/</code></li>
-    <li>必填：<code>thumbnail.png</code>（截圖，≤ 500 KB）</li>
-    <li>擇一：<code>index.html</code>（靜態 HTML 作業）或 <code>url.txt</code>（部署網址，需 https://）</li>
+    <li><strong>第一行</strong>：必填，需以 <code>https://</code> 開頭</li>
+    <li><strong>第二行</strong>：選填，不填則 gallery 顯示目錄名稱</li>
   </ul>
+
+  <h2>截圖格式</h2>
+  <ul>
+    <li>建議：<code>thumbnail.png</code>（PNG 畫質較好）</li>
+    <li>亦可：<code>thumbnail.jpg</code> / <code>thumbnail.jpeg</code>（CI 通過，顯示警告）</li>
+    <li>大小限制：≤ 500 KB</li>
+  </ul>
+
   <p>請參閱 <a href="../../git-guide.html">繳交作業流程說明</a> 了解完整繳交步驟。</p>
 </body>
 </html>
