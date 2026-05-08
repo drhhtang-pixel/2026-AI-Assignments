@@ -1,25 +1,1500 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>May 論文發表練習系統</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>簡報發表練習系統 — Presentation Practice System</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Helvetica Neue', Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      background: #f0f2f5; color: #333; min-height: 100vh;
+    }
+
+    /* ── Entry Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-card {
+      background: #fff; border-radius: 12px; padding: 32px 36px;
+      max-width: 440px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+    }
+    .modal-card h2 { font-size: 1.3rem; color: #2c3e50; margin-bottom: 3px; }
+    .modal-subtitle { font-size: 0.83rem; color: #7f8c8d; margin-bottom: 10px; }
+    .modal-desc {
+      font-size: 0.82rem; color: #555; line-height: 1.6;
+      background: #f0f7ff; border-radius: 6px; padding: 10px 12px;
+      margin-bottom: 20px; border-left: 3px solid #3498db;
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.88rem; font-weight: 600; color: #2c3e50; margin-bottom: 5px; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 9px 12px; border: 1px solid #ccc;
+      border-radius: 6px; font-size: 0.9rem; font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #3498db; }
+    .btn-enter {
+      width: 100%; padding: 11px; background: #3498db; color: #fff;
+      border: none; border-radius: 6px; font-size: 1rem; font-weight: 600;
+      cursor: pointer; transition: filter 0.15s;
+    }
+    .btn-enter:hover { filter: brightness(0.9); }
+
+    /* ── Header ── */
+    header {
+      background: #2c3e50; color: #fff; padding: 10px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .header-left h1 { font-size: 1.1rem; font-weight: 600; }
+    .header-left .header-sub { font-size: 0.72rem; color: #95a5a6; margin-top: 1px; }
+    .header-user { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
+    .header-user-name { font-weight: 600; }
+    .header-user-scenario {
+      background: rgba(255,255,255,0.15); padding: 2px 9px;
+      border-radius: 10px; font-size: 0.75rem;
+    }
+    .btn-switch {
+      background: rgba(255,255,255,0.18); color: #fff;
+      border: 1px solid rgba(255,255,255,0.3); border-radius: 4px;
+      padding: 4px 10px; font-size: 0.78rem; cursor: pointer;
+    }
+    .btn-switch:hover { background: rgba(255,255,255,0.28); filter: none; }
+
+    /* ── Info Bar ── */
+    .info-bar {
+      background: #eaf4fb; border-bottom: 1px solid #d0e8f5;
+      padding: 8px 20px;
+    }
+    .info-steps { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+    .info-step { display: flex; align-items: center; gap: 5px; font-size: 0.81rem; color: #2c3e50; white-space: nowrap; }
+    .step-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 17px; height: 17px; border-radius: 50%; background: #3498db;
+      color: #fff; font-size: 0.7rem; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* ── Mode Bar ── */
+    .mode-bar {
+      background: #34495e; padding: 7px 20px;
+      display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    }
+    .mode-bar-label { font-size: 0.78rem; color: #95a5a6; }
+    .mode-btn {
+      padding: 4px 14px; border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px; background: transparent; color: #bdc3c7;
+      font-size: 0.82rem; cursor: pointer; transition: all 0.15s;
+    }
+    .mode-btn.active { background: #3498db; color: #fff; border-color: #3498db; }
+    .mode-btn:hover:not(.active) { background: rgba(255,255,255,0.1); color: #fff; filter: none; }
+
+    /* ── Main Grid ── */
+    .main-grid {
+      display: grid; grid-template-columns: 280px 1fr 320px;
+      gap: 16px; padding: 16px; max-width: 1440px; margin: 0 auto; align-items: start;
+    }
+    @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+    .col-left, .col-right { display: flex; flex-direction: column; gap: 16px; }
+
+    /* ── Card ── */
+    .card { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .card h2 {
+      font-size: 0.95rem; font-weight: 700; color: #2c3e50;
+      margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #3498db;
+    }
+
+    /* ── Buttons ── */
+    button {
+      padding: 7px 14px; border: none; border-radius: 5px; cursor: pointer;
+      font-size: 0.88rem; font-family: inherit;
+      transition: filter 0.15s, transform 0.1s; white-space: nowrap;
+    }
+    button:hover:not(:disabled) { filter: brightness(0.9); }
+    button:active:not(:disabled) { transform: scale(0.97); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-primary   { background: #3498db; color: #fff; }
+    .btn-warning   { background: #f39c12; color: #fff; }
+    .btn-secondary { background: #95a5a6; color: #fff; }
+    .btn-success   { background: #27ae60; color: #fff; }
+    .btn-export    { background: #8e44ad; color: #fff; }
+    .btn-danger    { background: #e74c3c; color: #fff; }
+    .btn-teal      { background: #16a085; color: #fff; }
+
+    /* ── My Data ── */
+    .dm-user-info {
+      font-size: 0.88rem; color: #555; margin-bottom: 12px; padding: 8px 10px;
+      background: #f0f7ff; border-radius: 5px; border-left: 3px solid #3498db;
+      line-height: 1.8;
+    }
+    .dm-btn-col { display: flex; flex-direction: column; gap: 8px; }
+    .btn-dm-import-label {
+      display: block; padding: 7px 14px; background: #16a085; color: #fff;
+      border-radius: 5px; cursor: pointer; font-size: 0.88rem; text-align: center;
+    }
+    .btn-dm-import-label input[type="file"] { display: none; }
+    .dm-warning-text { font-size: 0.78rem; color: #b7770d; background: #fef9ec; border-left: 3px solid #f0c040; border-radius: 4px; padding: 7px 10px; margin-bottom: 10px; line-height: 1.5; }
+    .dm-msg { margin-top: 10px; font-size: 0.82rem; padding: 7px 10px; border-radius: 4px; display: none; }
+    .dm-msg.success { background: #d5f5e3; color: #1e8449; display: block; }
+    .dm-msg.error   { background: #fadbd8; color: #c0392b; display: block; }
+
+    /* ── Timer ── */
+    .timer-config { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.88rem; }
+    .timer-config input {
+      width: 58px; padding: 4px 8px; border: 1px solid #ccc;
+      border-radius: 5px; font-size: 0.9rem; text-align: center;
+    }
+    #timer-display {
+      font-size: 3.2rem; font-weight: 700; font-family: 'Courier New', monospace;
+      text-align: center; color: #2c3e50; margin: 8px 0 14px;
+      letter-spacing: 2px; transition: color 0.3s;
+    }
+    #timer-display.warning { color: #e74c3c; }
+
+    /* ── Slide viewer ── */
+    .slide-upload { margin-bottom: 10px; }
+    .slide-upload label {
+      display: inline-block; padding: 7px 14px; background: #3498db; color: #fff;
+      border-radius: 5px; cursor: pointer; font-size: 0.88rem; transition: filter 0.15s;
+    }
+    .slide-upload label:hover { filter: brightness(0.9); }
+    .slide-upload input[type="file"] { display: none; }
+    .upload-hint { font-size: 0.76rem; color: #888; margin-top: 5px; }
+    .upload-warn {
+      font-size: 0.8rem; color: #c0392b; background: #fdf2f2;
+      border: 1px solid #f5c6c6; border-radius: 4px;
+      padding: 7px 10px; margin-top: 8px; display: none; line-height: 1.5;
+    }
+    #slide-canvas {
+      width: 100%; display: block; border: 1px solid #e0e0e0;
+      border-radius: 6px; background: #fafafa; min-height: 180px;
+    }
+    .slide-controls {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-top: 10px;
+    }
+    #slide-page-info { font-size: 0.88rem; color: #666; }
+
+    /* ── Script editor ── */
+    .script-section { margin-top: 14px; border-top: 2px solid #e8f4fd; padding-top: 12px; }
+    .script-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .script-header label { font-size: 0.88rem; font-weight: 600; color: #2c3e50; }
+    .save-hint { font-size: 0.78rem; color: #27ae60; opacity: 0; transition: opacity 0.4s; }
+    .save-hint.show { opacity: 1; }
+    #slide-script {
+      width: 100%; min-height: 100px; padding: 9px 10px;
+      border: 1px solid #ccc; border-radius: 5px; font-size: 0.88rem;
+      font-family: inherit; resize: vertical; line-height: 1.6;
+    }
+    #slide-script:focus { outline: none; border-color: #3498db; }
+    .script-btn-row { display: flex; gap: 8px; margin-top: 8px; }
+
+    /* ── Page Notes ── */
+    .notes-section { margin-top: 14px; border-top: 2px solid #fef0e2; padding-top: 12px; }
+    .notes-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .notes-header label { font-size: 0.88rem; font-weight: 600; color: #2c3e50; }
+    .notes-fields { display: flex; flex-direction: column; gap: 8px; }
+    .note-field label { display: block; font-size: 0.77rem; font-weight: 600; color: #7f8c8d; margin-bottom: 3px; }
+    .note-field textarea {
+      width: 100%; padding: 7px 9px; border: 1px solid #e8d5b7;
+      border-radius: 4px; font-size: 0.84rem; font-family: inherit;
+      resize: vertical; min-height: 44px; line-height: 1.5;
+    }
+    .note-field textarea:focus { outline: none; border-color: #f39c12; }
+    .notes-btn-row { display: flex; gap: 8px; margin-top: 8px; }
+
+    /* ── Export ── */
+    .export-info { font-size: 0.82rem; color: #666; margin-bottom: 12px; line-height: 1.5; }
+    .export-btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ── Practice Notes ── */
+    .note-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .note-header-row label { font-size: 0.88rem; font-weight: 600; color: #2c3e50; }
+    #log-note {
+      width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 5px;
+      resize: vertical; font-size: 0.88rem; font-family: inherit;
+      min-height: 90px; margin-bottom: 10px; line-height: 1.6;
+    }
+    #log-note:focus { outline: none; border-color: #3498db; }
+    .note-btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    #log-meta { font-size: 0.78rem; color: #888; margin-bottom: 6px; }
+    #log-list { max-height: 200px; overflow-y: auto; }
+    .log-entry {
+      padding: 9px 10px; border: 1px solid #ececec; border-radius: 6px;
+      margin-bottom: 7px; font-size: 0.83rem; background: #fafafa;
+    }
+    .log-header { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .log-date { font-weight: 600; color: #2c3e50; }
+    .log-status { display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 0.77rem; }
+    .log-status.completed  { background: #d5f5e3; color: #1e8449; }
+    .log-status.incomplete { background: #fadbd8; color: #c0392b; }
+    .log-tag { display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 0.75rem; background: #eaf4fb; color: #2980b9; }
+    .log-sub { font-size: 0.77rem; color: #888; margin-top: 3px; }
+    .log-note-text { color: #666; margin-top: 4px; }
+
+    /* ── Q&A ── */
+    .qa-time-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 0.85rem; font-weight: 600; color: #2c3e50; }
+    .qa-time-row select { padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; font-family: inherit; font-weight: 400; }
+    #qa-time-up { background: #e74c3c; color: #fff; text-align: center; padding: 7px; border-radius: 5px; font-weight: 700; display: none; margin-bottom: 8px; }
+    #answer-timer { font-size: 1.6rem; font-weight: 700; font-family: 'Courier New', monospace; text-align: center; color: #2c3e50; margin-bottom: 10px; transition: color 0.3s; }
+    #answer-timer.warning { color: #e74c3c; }
+    #question-box {
+      background: #f0f7ff; border-left: 4px solid #3498db;
+      padding: 12px; border-radius: 5px; margin-bottom: 10px;
+      min-height: 72px; font-size: 0.93rem; line-height: 1.6; color: #2c3e50;
+    }
+    #answer-box {
+      background: #eafaf1; border-left: 4px solid #27ae60;
+      padding: 12px; border-radius: 5px; margin-bottom: 10px;
+      font-size: 0.88rem; line-height: 1.6; display: none; color: #1a5c35;
+    }
+    #user-answer {
+      width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 5px;
+      font-size: 0.88rem; font-family: inherit; resize: vertical; margin-bottom: 8px; display: none;
+    }
+
+    /* ── Q&A Manager ── */
+    .qa-manager { margin-top: 14px; border-top: 1px solid #eee; padding-top: 12px; }
+    .qa-manager-toggle { background: none; border: 1px solid #bbb; color: #555; font-size: 0.82rem; padding: 5px 10px; border-radius: 4px; cursor: pointer; width: 100%; text-align: left; }
+    .qa-manager-toggle:hover { background: #f5f5f5; filter: none; }
+    .qa-manager-body { display: none; margin-top: 10px; }
+    .qa-manager-body.open { display: block; }
+    .qa-add-form { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    .qa-add-form textarea { width: 100%; padding: 7px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; font-family: inherit; resize: vertical; }
+    .qa-add-form textarea:focus { outline: none; border-color: #3498db; }
+    #qa-item-list { max-height: 240px; overflow-y: auto; }
+    .qa-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px; border: 1px solid #eee; border-radius: 5px; margin-bottom: 6px; background: #fafafa; font-size: 0.82rem; }
+    .qa-item-text { flex: 1; line-height: 1.5; color: #333; }
+    .qa-item-q { font-weight: 600; color: #2c3e50; }
+    .qa-item-a { color: #666; margin-top: 2px; }
+    .qa-item-del { background: none; border: none; color: #e74c3c; font-size: 1rem; cursor: pointer; padding: 0 4px; flex-shrink: 0; line-height: 1; }
+    .qa-count { font-size: 0.8rem; color: #888; margin-bottom: 8px; }
+
+    /* ── Speech ── */
+    .speech-section { margin-top: 12px; border-top: 2px solid #fde8e8; padding-top: 12px; }
+    .speech-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .rec-dot { width: 10px; height: 10px; border-radius: 50%; background: #e74c3c; display: none; flex-shrink: 0; }
+    .rec-dot.active { display: inline-block; animation: pulse-dot 1s infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.25} }
+    #rec-status { font-size: 0.8rem; color: #e74c3c; }
+    #interim-text {
+      min-height: 48px; padding: 8px 10px; background: #fff9f9;
+      border: 1px dashed #e74c3c; border-radius: 5px; font-size: 0.85rem;
+      color: #888; line-height: 1.6; margin-bottom: 8px;
+      white-space: pre-wrap; word-break: break-all;
+    }
+    #diff-result { display: none; }
+    .score-badge { display: inline-block; padding: 3px 11px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; }
+    .score-good { background: #d5f5e3; color: #1a5c35; }
+    .score-ok   { background: #fef9e7; color: #7d6608; }
+    .score-low  { background: #fadbd8; color: #c0392b; }
+    .diff-body { background: #fafafa; border: 1px solid #e0e0e0; border-radius: 5px; padding: 10px 12px; font-size: 0.9rem; line-height: 2.2; word-break: break-all; margin-bottom: 6px; }
+    .w-match { background: #d5f5e3; color: #1a5c35; border-radius: 2px; padding: 0 1px; }
+    .w-miss  { background: #fadbd8; color: #c0392b; border-radius: 2px; padding: 0 1px; text-decoration: line-through; }
+    .spoken-text { font-size: 0.78rem; color: #888; line-height: 1.5; border-top: 1px solid #eee; padding-top: 6px; margin-top: 4px; }
+
+    /* ── Notice ── */
+    .notice { margin-top: 12px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 5px; padding: 8px 12px; font-size: 0.82rem; color: #7d5f00; line-height: 1.5; }
+
+    /* ── Print ── */
+    @media print {
+      header, .mode-bar, .info-bar, .col-left, .col-right, .col-middle,
+      .slide-upload, .slide-controls, .script-btn-row, .notice, .qa-manager,
+      .notes-btn-row, .speech-section, .modal-overlay { display: none !important; }
+      body { background: #fff; }
+      .main-grid { display: block; }
+      .card { box-shadow: none; padding: 0; }
+      .print-script-title { font-size: 1.1rem; font-weight: 700; color: #2c3e50; margin: 20px 0 6px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+      .print-note-label { font-size: 0.9rem; font-weight: 700; color: #555; margin: 8px 0 2px; }
+      .print-note-value { font-size: 0.9rem; line-height: 1.7; margin: 0 0 6px 8px; white-space: pre-wrap; }
+      #print-all-scripts { display: block !important; }
+    }
+    #print-all-scripts { display: none; }
+  </style>
 </head>
 <body>
-  <h1>論文發表練習系統</h1>
 
-  <p>這是我開發的 Human-AI Interaction 練習系統。</p>
+<!-- ══ Entry Modal ══ -->
+<div id="entry-modal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h2>📊 簡報發表練習系統</h2>
+    <div class="modal-subtitle">Presentation Practice System</div>
+    <div class="modal-desc">
+      本工具適用於簡報、提案、論文發表、課程試講、面試簡報與口頭報告練習。
+    </div>
+    <div class="form-group">
+      <label for="input-username">練習者名稱</label>
+      <input type="text" id="input-username" placeholder="輸入你的名稱" maxlength="30">
+    </div>
+    <div class="form-group">
+      <label for="input-scenario">練習情境</label>
+      <select id="input-scenario">
+        <option value="論文發表">論文發表</option>
+        <option value="工作簡報">工作簡報</option>
+        <option value="業務提案">業務提案</option>
+        <option value="課程試講">課程試講</option>
+        <option value="面試簡報">面試簡報</option>
+        <option value="其他">其他</option>
+      </select>
+    </div>
+    <button class="btn-enter" id="btn-enter">開始練習 →</button>
+    <button class="btn-secondary" id="btn-cancel" style="width:100%;padding:11px;margin-top:8px;font-size:1rem;font-weight:600;border-radius:6px;">取消</button>
+  </div>
+</div>
 
-  <p>功能包含：</p>
-  <ul>
-    <li>發表計時器</li>
-    <li>PDF 投影片展示</li>
-    <li>Q&A 模擬練習</li>
-    <li>語音朗讀輔助</li>
-  </ul>
+<div id="print-all-scripts"></div>
 
-  <p>以下為系統畫面：</p>
+<!-- ══ Header ══ -->
+<header>
+  <div class="header-left">
+    <h1>📊 簡報發表練習系統</h1>
+    <div class="header-sub">Presentation Practice System</div>
+  </div>
+  <div class="header-user">
+    <span class="header-user-name" id="header-username"></span>
+    <span class="header-user-scenario" id="header-scenario"></span>
+    <button class="btn-switch" id="btn-switch-user">切換使用者</button>
+  </div>
+</header>
 
-  <img src="thumbnail.png" width="600">
+<!-- ══ Info Bar ══ -->
+<div class="info-bar">
+  <div class="info-steps">
+    <div class="info-step"><span class="step-num">1</span>上傳簡報或 PDF</div>
+    <div class="info-step"><span class="step-num">2</span>選擇練習模式與時間</div>
+    <div class="info-step"><span class="step-num">3</span>開始發表練習</div>
+    <div class="info-step"><span class="step-num">4</span>進行 Q&amp;A 模擬</div>
+    <div class="info-step"><span class="step-num">5</span>儲存練習筆記</div>
+  </div>
+</div>
 
+<!-- ══ Mode Bar ══ -->
+<div class="mode-bar">
+  <span class="mode-bar-label">練習模式：</span>
+  <button class="mode-btn active" data-mode="full">📋 完整簡報練習</button>
+  <button class="mode-btn" data-mode="compact">⚡ 精簡簡報練習</button>
+</div>
+
+<div class="main-grid">
+
+  <!-- ══ Left ══ -->
+  <div class="col-left">
+
+    <div class="card">
+      <h2>⏱ 發表計時器</h2>
+      <div class="timer-config">
+        <label for="timer-input">時間（分鐘）：</label>
+        <input type="number" id="timer-input" value="15" min="1" max="60">
+      </div>
+      <div id="timer-display">15:00</div>
+      <div class="btn-group">
+        <button class="btn-primary"   id="btn-timer-start">開始</button>
+        <button class="btn-warning"   id="btn-timer-pause" disabled>暫停</button>
+        <button class="btn-secondary" id="btn-timer-reset">重置</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📄 匯出口說文字稿</h2>
+      <p class="export-info">將所有投影片的口說備註合併為完整文字稿，可下載或列印。</p>
+      <div class="export-btn-row">
+        <button class="btn-export" id="btn-export-word">⬇ 下載 Word</button>
+        <button class="btn-export" id="btn-export-pdf">🖨 列印 / PDF</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📝 練習筆記</h2>
+      <div class="note-header-row">
+        <label for="log-note">本次練習心得</label>
+        <span id="note-save-hint" class="save-hint">已儲存 ✓</span>
+      </div>
+      <textarea id="log-note" placeholder="輸入這次練習的心得或改善建議…"></textarea>
+      <div class="note-btn-row">
+        <button class="btn-success"   id="btn-save-note">💾 儲存筆記</button>
+        <button class="btn-secondary" id="btn-clear-note">🗑 清空筆記</button>
+        <button class="btn-secondary" id="btn-download-note" style="font-size:0.82rem;">📥 下載紀錄</button>
+      </div>
+      <p style="font-size:0.75rem;color:#999;margin-top:3px;">下載本次練習紀錄與所有頁面備註（.txt）</p>
+      <div id="log-meta"></div>
+      <div id="log-list"><p style="color:#aaa;font-size:0.85rem;">尚無練習紀錄</p></div>
+    </div>
+
+  </div>
+
+  <!-- ══ Middle ══ -->
+  <div class="col-middle">
+    <div class="card">
+      <h2>🖼 投影片瀏覽</h2>
+      <div class="slide-upload">
+        <label for="pdf-upload">📂 上傳投影片檔案</label>
+        <input type="file" id="pdf-upload" accept="application/pdf,.pdf">
+        <div class="upload-hint">📄 僅支援 PDF 瀏覽｜上限 20 MB</div>
+        <div class="upload-warn" id="upload-warn"></div>
+      </div>
+      <canvas id="slide-canvas"></canvas>
+      <div class="slide-controls">
+        <button class="btn-secondary" id="btn-slide-prev" disabled>◀ 上一頁</button>
+        <span id="slide-page-info">尚未載入 PDF</span>
+        <button class="btn-secondary" id="btn-slide-next" disabled>下一頁 ▶</button>
+      </div>
+
+      <div class="script-section" id="script-section" style="display:none;">
+        <div class="script-header">
+          <label id="script-label">📋 第 1 頁口說稿</label>
+          <span class="save-hint" id="script-save-hint">已儲存 ✓</span>
+        </div>
+        <textarea id="slide-script" placeholder="輸入這頁的口說內容，或點擊「擷取文字」自動填入 PDF 文字…"></textarea>
+        <div class="script-btn-row">
+          <button class="btn-secondary" id="btn-extract-text">擷取文字</button>
+          <button class="btn-primary"   id="btn-save-script">儲存口說稿</button>
+          <button class="btn-secondary" id="btn-clear-script">清除</button>
+        </div>
+      </div>
+
+      <div class="notes-section" id="notes-section" style="display:none;">
+        <div class="notes-header">
+          <label id="notes-label">🗒 第 1 頁備註</label>
+          <span class="save-hint" id="notes-save-hint">已儲存 ✓</span>
+        </div>
+        <div class="notes-fields">
+          <div class="note-field">
+            <label>📌 本頁重點</label>
+            <textarea id="note-key" placeholder="這頁要強調的核心內容…" rows="2"></textarea>
+          </div>
+          <div class="note-field">
+            <label>⚠ 提醒事項</label>
+            <textarea id="note-reminder" placeholder="換頁提示、語速節奏、強調語氣…" rows="2"></textarea>
+          </div>
+          <div class="note-field">
+            <label>❓ 可能被問的問題</label>
+            <textarea id="note-question" placeholder="這頁可能引發的提問…" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="notes-btn-row">
+          <button class="btn-warning"   id="btn-save-notes">儲存備註</button>
+          <button class="btn-secondary" id="btn-clear-notes">清除備註</button>
+        </div>
+      </div>
+
+      <div class="speech-section">
+        <div class="speech-header">
+          <button class="btn-warning" id="btn-speech">🎤 開始朗讀</button>
+          <select id="speech-lang" style="padding:5px 8px;border:1px solid #ccc;border-radius:5px;font-size:0.85rem;font-family:inherit;">
+            <option value="zh-TW">中文</option>
+            <option value="en-US">英文</option>
+            <option value="zh-TW-en">中英混合</option>
+          </select>
+          <span class="rec-dot" id="rec-dot"></span>
+          <span id="rec-status"></span>
+        </div>
+        <div id="interim-text">點擊「開始朗讀」後，這裡會即時顯示辨識結果，停止後顯示對稿分析…</div>
+        <div id="diff-result"></div>
+      </div>
+
+      <div class="notice">
+        ⚠ <strong>PDF 預覽需要網路連線</strong>（PDF.js 由 CDN 載入）。目前僅支援 PDF 格式，PPT / PPTX / Word 請先轉成 PDF 再上傳。
+        瀏覽器支援：<strong>Chrome / Edge 最佳</strong>；Firefox、Safari macOS 可用；Safari iOS 語音辨識有限制。
+        部署至 GitHub Pages 後完整可用（HTTPS 自動提供）。語音辨識需允許麥克風權限。
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Right ══ -->
+  <div class="col-right">
+
+    <div class="card">
+      <h2>❓ Q&amp;A 模擬練習</h2>
+      <div class="qa-time-row">
+        <label for="qa-time-select">每題回答時間：</label>
+        <select id="qa-time-select">
+          <option value="60">1 分鐘</option>
+          <option value="120" selected>2 分鐘</option>
+          <option value="180">3 分鐘</option>
+          <option value="300">5 分鐘</option>
+          <option value="600">10 分鐘</option>
+        </select>
+      </div>
+      <div id="qa-time-up">⏰ 時間到！</div>
+      <div id="answer-timer">02:00</div>
+      <div id="question-box">點擊「抽題」開始 Q&amp;A 練習</div>
+      <textarea id="user-answer" placeholder="在這裡輸入你的回答，再點「顯示答案」對照…" rows="3"></textarea>
+      <div id="answer-box"></div>
+      <div class="btn-group">
+        <button class="btn-primary"   id="btn-draw">抽題</button>
+        <button class="btn-warning"   id="btn-qa-pause" disabled>暫停</button>
+        <button class="btn-secondary" id="btn-qa-reset" disabled>重置</button>
+        <button class="btn-success"   id="btn-show-answer" disabled>顯示答案</button>
+      </div>
+
+      <div class="qa-manager">
+        <button class="qa-manager-toggle" id="btn-toggle-manager">▶ 管理題目</button>
+        <div class="qa-manager-body" id="qa-manager-body">
+          <div class="qa-add-form">
+            <textarea id="input-q" rows="2" placeholder="輸入問題…"></textarea>
+            <textarea id="input-a" rows="2" placeholder="輸入參考答案…"></textarea>
+            <button class="btn-primary"   id="btn-add-question"  style="align-self:flex-start;">＋ 新增題目</button>
+            <button class="btn-secondary" id="btn-download-qa"   style="align-self:flex-start;">📥 下載題庫</button>
+          </div>
+          <div class="qa-count" id="qa-count"></div>
+          <div id="qa-item-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🗂 我的資料</h2>
+      <div class="dm-user-info">
+        練習者：<strong id="dm-username">（未設定）</strong>
+      </div>
+      <p class="dm-warning-text">⚠ 提醒：本工具為前端練習工具，資料僅儲存在瀏覽器中，建議在關閉頁面前下載口說稿、練習紀錄與題庫備份，以避免資料遺失。</p>
+      <div class="dm-btn-col">
+        <button class="btn-teal" id="btn-feedback">💬 提供回饋 / 建議</button>
+        <p style="font-size:0.76rem;color:#888;margin-top:2px;margin-bottom:6px;">歡迎留下使用心得，幫助我改善這個工具</p>
+        <button class="btn-danger" id="btn-dm-clear">🗑 清除我的所有紀錄</button>
+      </div>
+      <div id="dm-msg" class="dm-msg"></div>
+    </div>
+
+  </div>
+
+</div><!-- .main-grid -->
+
+<script>
+'use strict';
+
+const _pdfReady = typeof pdfjsLib !== 'undefined';
+if (_pdfReady) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+// ── DOM refs (declared first so applyUser can reference them) ─────────────────
+const logNoteEl    = document.getElementById('log-note');
+const noteSaveHint = document.getElementById('note-save-hint');
+
+// ── AppState ──────────────────────────────────────────────────────────────────
+const AppState = {
+  user:    { name: '', scenario: '' },
+  mode:    'full',
+  timer:   { interval: null, remaining: 15*60, configured: 15*60, running: false, started: false },
+  slide:   { pdf: null, currentPage: 1, totalPages: 0, filename: '' },
+  qa:      { currentIndex: -1, lastIndex: -1, answerInterval: null, answerRemaining: 120, timeConfig: 120, paused: false },
+  logs:    [],
+  session: { questionsUsed: [] },
+};
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function sanitizeKey(name) { return (name || '').trim().replace(/\s+/g, '_'); }
+function lsKey(suffix) {
+  const k = sanitizeKey(AppState.user.name);
+  return k ? `pps-${suffix}-${k}` : null;
+}
+function fmt(s) {
+  return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+}
+function playBeep() {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.frequency.value = 880; o.type = 'sine';
+    g.gain.setValueAtTime(0.5, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 1.2);
+    o.start(ac.currentTime); o.stop(ac.currentTime + 1.2);
+  } catch(_) {}
+}
+function getModeLabel(m) {
+  return { full: '完整簡報練習', compact: '精簡簡報練習' }[m] || m;
+}
+function showHint(el) {
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1500);
+}
+
+// ── User / Entry ──────────────────────────────────────────────────────────────
+const entryModal   = document.getElementById('entry-modal');
+const headerNameEl = document.getElementById('header-username');
+const headerScenEl = document.getElementById('header-scenario');
+const dmUsernameEl = document.getElementById('dm-username');
+
+function loadUser() {
+  try { return JSON.parse(localStorage.getItem('pps-user') || 'null'); } catch(_) { return null; }
+}
+function saveUser(name, scenario) {
+  localStorage.setItem('pps-user', JSON.stringify({ name, scenario }));
+}
+function loadNoteDraft() {
+  const key = lsKey('note-draft');
+  if (key) logNoteEl.value = localStorage.getItem(key) || '';
+}
+function clearQAUI() {
+  clearInterval(AppState.qa.answerInterval);
+  AppState.qa.answerInterval  = null;
+  AppState.qa.currentIndex    = -1;
+  AppState.qa.lastIndex       = -1;
+  AppState.qa.answerRemaining = AppState.qa.timeConfig;
+  AppState.qa.paused          = false;
+  const _bp = document.getElementById('btn-qa-pause');
+  if (_bp) { _bp.textContent = '暫停'; _bp.disabled = true; }
+  const _brst = document.getElementById('btn-qa-reset');
+  if (_brst) _brst.disabled = true;
+  const _qb = document.getElementById('question-box');
+  if (!_qb) return;
+  _qb.textContent = '點擊「抽題」開始 Q&A 練習';
+  const _ab = document.getElementById('answer-box');
+  if (_ab) { _ab.textContent = ''; _ab.style.display = 'none'; }
+  const _ua = document.getElementById('user-answer');
+  if (_ua) { _ua.value = ''; _ua.style.display = 'none'; }
+  const _qu = document.getElementById('qa-time-up');
+  if (_qu) _qu.style.display = 'none';
+  const _at = document.getElementById('answer-timer');
+  if (_at) {
+    _at.classList.remove('warning');
+    const t = AppState.qa.timeConfig;
+    _at.textContent = `${Math.floor(t/60).toString().padStart(2,'0')}:${(t%60).toString().padStart(2,'0')}`;
+  }
+}
+function clearSlideUI() {
+  AppState.slide.pdf = null;
+  AppState.slide.currentPage = 1;
+  AppState.slide.totalPages = 0;
+  AppState.slide.filename = '';
+  const _canvas = document.getElementById('slide-canvas');
+  if (_canvas) _canvas.getContext('2d').clearRect(0, 0, _canvas.width, _canvas.height);
+  const _pi = document.getElementById('slide-page-info');
+  if (_pi) _pi.textContent = '尚未載入 PDF';
+  const _prev = document.getElementById('btn-slide-prev');
+  const _next = document.getElementById('btn-slide-next');
+  if (_prev) _prev.disabled = true;
+  if (_next) _next.disabled = true;
+  const _ss = document.getElementById('slide-script');
+  if (_ss) _ss.value = '';
+  const _nk = document.getElementById('note-key');
+  if (_nk) _nk.value = '';
+  const _nr = document.getElementById('note-reminder');
+  if (_nr) _nr.value = '';
+  const _nq = document.getElementById('note-question');
+  if (_nq) _nq.value = '';
+  const _scSec = document.getElementById('script-section');
+  if (_scSec) _scSec.style.display = 'none';
+  const _noSec = document.getElementById('notes-section');
+  if (_noSec) _noSec.style.display = 'none';
+  const _up = document.getElementById('pdf-upload');
+  if (_up) { try { _up.value = ''; } catch(_) {} }
+  const _uw = document.getElementById('upload-warn');
+  if (_uw) _uw.style.display = 'none';
+  const _ln = document.getElementById('log-note');
+  if (_ln) _ln.value = '';
+}
+function applyUser(name, scenario) {
+  clearSlideUI();
+  clearQAUI();
+  AppState.user.name     = name;
+  AppState.user.scenario = scenario;
+  headerNameEl.textContent = name;
+  headerScenEl.textContent = scenario;
+  dmUsernameEl.textContent = name || '（未設定）';
+  loadLogs();
+  loadQuestions();
+  loadNoteDraft();
+}
+
+function openEntryModal() {
+  const cur = AppState.user.name;
+  document.getElementById('input-username').value = (cur && cur !== '未命名使用者') ? cur : '';
+  document.getElementById('input-scenario').value = AppState.user.scenario || '論文發表';
+  entryModal.classList.remove('hidden');
+}
+
+document.getElementById('btn-enter').addEventListener('click', () => {
+  const name     = document.getElementById('input-username').value.trim() || '未命名使用者';
+  const scenario = document.getElementById('input-scenario').value;
+  try { saveUser(name, scenario); } catch(_) {}
+  entryModal.classList.add('hidden');
+  try { applyUser(name, scenario); } catch(_) {}
+});
+document.getElementById('btn-cancel').addEventListener('click', () => {
+  if (AppState.user.name) {
+    entryModal.classList.add('hidden');
+  } else {
+    const scenario = document.getElementById('input-scenario').value;
+    try { saveUser('未命名使用者', scenario); } catch(_) {}
+    entryModal.classList.add('hidden');
+    try { applyUser('未命名使用者', scenario); } catch(_) {}
+  }
+});
+document.getElementById('btn-switch-user').addEventListener('click', openEntryModal);
+
+let questionBank = [];
+
+{
+  const _savedUser = loadUser();
+  if (_savedUser && _savedUser.name) {
+    try { applyUser(_savedUser.name, _savedUser.scenario || '論文發表'); } catch(_) {}
+  } else {
+    entryModal.classList.remove('hidden');
+  }
+}
+
+// ── Mode Selector ─────────────────────────────────────────────────────────────
+const modeDefaults = { full: 15, compact: 5 };
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    AppState.mode = btn.dataset.mode;
+    if (!AppState.timer.running) {
+      const def = modeDefaults[AppState.mode];
+      timerInput.value = def;
+      AppState.timer.configured = def * 60;
+      AppState.timer.remaining  = def * 60;
+      refreshTimerDisplay();
+    }
+  });
+});
+
+// ── Practice Logs ─────────────────────────────────────────────────────────────
+function loadLogs() {
+  const key = lsKey('logs');
+  try { AppState.logs = key ? JSON.parse(localStorage.getItem(key) || '[]') : []; }
+  catch(_) { AppState.logs = []; }
+  renderLogs();
+}
+function persistLogs() {
+  const key = lsKey('logs');
+  if (key) localStorage.setItem(key, JSON.stringify(AppState.logs));
+}
+function renderLogs() {
+  const el   = document.getElementById('log-list');
+  const meta = document.getElementById('log-meta');
+  if (!AppState.logs.length) {
+    meta.textContent = '';
+    el.innerHTML = '<p style="color:#aaa;font-size:0.85rem;">尚無練習紀錄</p>';
+    return;
+  }
+  const total  = AppState.logs.length;
+  const recent = [...AppState.logs].reverse().slice(0, 10);
+  meta.textContent = `最近 ${recent.length} 次（共 ${total} 次）`;
+  el.innerHTML = '';
+  recent.forEach(log => {
+    const d = document.createElement('div'); d.className = 'log-entry';
+    const dur = log.duration || 0;
+    const durStr = dur > 0 ? `${Math.floor(dur/60)}分${dur%60}秒` : '';
+    d.innerHTML = `
+      <div class="log-header">
+        <span class="log-date">${log.datetime}</span>
+        <span class="log-status ${log.completed ? 'completed' : 'incomplete'}">${log.completed ? '✓ 完成' : '✗ 未完成'}</span>
+        ${log.scenario ? `<span class="log-tag">${log.scenario}</span>` : ''}
+        ${log.mode     ? `<span class="log-tag">${log.mode}</span>` : ''}
+        ${durStr       ? `<span style="font-size:0.77rem;color:#888;">${durStr}</span>` : ''}
+      </div>
+      <div class="log-sub">
+        ${log.username ? `👤 ${log.username}` : ''}
+        ${log.slot     ? `　📁 ${log.slot}` : ''}
+        ${log.filename && log.filename !== '（未上傳）' ? `　📄 ${log.filename}` : ''}
+      </div>
+      ${log.reflection ? `<div class="log-note-text">${log.reflection}</div>` : ''}`;
+    el.appendChild(d);
+  });
+}
+
+// ── Timer ─────────────────────────────────────────────────────────────────────
+const timerDisplay = document.getElementById('timer-display');
+const timerInput   = document.getElementById('timer-input');
+const btnStart     = document.getElementById('btn-timer-start');
+const btnPause     = document.getElementById('btn-timer-pause');
+const btnReset     = document.getElementById('btn-timer-reset');
+
+function refreshTimerDisplay() {
+  timerDisplay.textContent = fmt(AppState.timer.remaining);
+  timerDisplay.classList.toggle('warning', AppState.timer.remaining <= 180);
+}
+function stopTimer() {
+  clearInterval(AppState.timer.interval);
+  AppState.timer.interval = null; AppState.timer.running = false;
+}
+
+btnStart.addEventListener('click', () => {
+  if (AppState.timer.running) return;
+  AppState.timer.running = true; AppState.timer.started = true;
+  timerInput.disabled = true; btnStart.disabled = true; btnPause.disabled = false;
+  AppState.timer.interval = setInterval(() => {
+    AppState.timer.remaining = Math.max(0, AppState.timer.remaining - 1);
+    refreshTimerDisplay();
+    if (AppState.timer.remaining === 0) {
+      stopTimer(); btnStart.disabled = false; btnPause.disabled = true;
+      timerInput.disabled = false; playBeep();
+    }
+  }, 1000);
+});
+btnPause.addEventListener('click', () => {
+  if (!AppState.timer.running) return;
+  stopTimer(); btnStart.disabled = false; btnPause.disabled = true;
+});
+btnReset.addEventListener('click', () => {
+  stopTimer();
+  const m = Math.min(60, Math.max(1, parseInt(timerInput.value) || 15));
+  timerInput.value = m; AppState.timer.configured = m * 60;
+  AppState.timer.remaining = m * 60; AppState.timer.started = false;
+  timerInput.disabled = false; btnStart.disabled = false; btnPause.disabled = true;
+  refreshTimerDisplay();
+});
+timerInput.addEventListener('change', () => {
+  if (AppState.timer.running) return;
+  const m = Math.min(60, Math.max(1, parseInt(timerInput.value) || 15));
+  timerInput.value = m; AppState.timer.configured = m * 60;
+  AppState.timer.remaining = m * 60; refreshTimerDisplay();
+});
+
+// ── Slide Scripts ─────────────────────────────────────────────────────────────
+function getScripts() {
+  const key = lsKey('scripts');
+  try { return key ? JSON.parse(localStorage.getItem(key) || '{}') : {}; } catch(_) { return {}; }
+}
+function saveScript(p, text) {
+  const key = lsKey('scripts');
+  const all = getScripts(); all[p] = text;
+  if (key) localStorage.setItem(key, JSON.stringify(all));
+}
+function getScript(p) { return getScripts()[p] || ''; }
+
+const scriptSection  = document.getElementById('script-section');
+const scriptLabel    = document.getElementById('script-label');
+const slideScriptEl  = document.getElementById('slide-script');
+const scriptSaveHint = document.getElementById('script-save-hint');
+
+function loadScriptForPage(p) {
+  scriptSection.style.display = 'block';
+  scriptLabel.textContent = `📋 第 ${p} 頁口說稿`;
+  slideScriptEl.value = getScript(p);
+}
+document.getElementById('btn-save-script').addEventListener('click', () => {
+  saveScript(AppState.slide.currentPage, slideScriptEl.value); showHint(scriptSaveHint);
+});
+slideScriptEl.addEventListener('blur', () => {
+  if (!AppState.slide.pdf) return;
+  saveScript(AppState.slide.currentPage, slideScriptEl.value); showHint(scriptSaveHint);
+});
+document.getElementById('btn-clear-script').addEventListener('click', () => {
+  slideScriptEl.value = ''; saveScript(AppState.slide.currentPage, '');
+});
+
+// ── Page Notes ────────────────────────────────────────────────────────────────
+function getAllNotes() {
+  const key = lsKey('notes');
+  try { return key ? JSON.parse(localStorage.getItem(key) || '{}') : {}; } catch(_) { return {}; }
+}
+function getNote(p) { return getAllNotes()[p] || { key: '', reminder: '', question: '' }; }
+function saveNote(p, n) {
+  const key = lsKey('notes');
+  const all = getAllNotes(); all[p] = n;
+  if (key) localStorage.setItem(key, JSON.stringify(all));
+}
+
+const notesSection   = document.getElementById('notes-section');
+const notesLabel     = document.getElementById('notes-label');
+const notesSaveHint  = document.getElementById('notes-save-hint');
+const noteKeyEl      = document.getElementById('note-key');
+const noteReminderEl = document.getElementById('note-reminder');
+const noteQEl        = document.getElementById('note-question');
+
+function loadNotesForPage(p) {
+  notesSection.style.display = 'block';
+  notesLabel.textContent = `🗒 第 ${p} 頁備註`;
+  const n = getNote(p);
+  noteKeyEl.value = n.key || ''; noteReminderEl.value = n.reminder || ''; noteQEl.value = n.question || '';
+}
+function saveCurrentNotes() {
+  saveNote(AppState.slide.currentPage, {
+    key: noteKeyEl.value, reminder: noteReminderEl.value, question: noteQEl.value,
+  });
+}
+document.getElementById('btn-save-notes').addEventListener('click', () => {
+  saveCurrentNotes(); showHint(notesSaveHint);
+});
+document.getElementById('btn-clear-notes').addEventListener('click', () => {
+  noteKeyEl.value = ''; noteReminderEl.value = ''; noteQEl.value = ''; saveCurrentNotes();
+});
+let notesInputTimer = null;
+[noteKeyEl, noteReminderEl, noteQEl].forEach(el => {
+  el.addEventListener('blur', () => {
+    if (!AppState.slide.pdf) return;
+    saveCurrentNotes(); showHint(notesSaveHint);
+  });
+  el.addEventListener('input', () => {
+    if (!AppState.slide.pdf) return;
+    clearTimeout(notesInputTimer);
+    notesInputTimer = setTimeout(() => { saveCurrentNotes(); showHint(notesSaveHint); }, 600);
+  });
+});
+
+// ── Slide Viewer ──────────────────────────────────────────────────────────────
+const pdfUpload   = document.getElementById('pdf-upload');
+const slideCanvas = document.getElementById('slide-canvas');
+const pageInfo    = document.getElementById('slide-page-info');
+const btnPrev     = document.getElementById('btn-slide-prev');
+const btnNext     = document.getElementById('btn-slide-next');
+const canvasCtx   = slideCanvas.getContext('2d');
+const uploadWarn  = document.getElementById('upload-warn');
+const MAX_SIZE = 20 * 1024 * 1024;
+
+async function extractPageText(p) {
+  if (!AppState.slide.pdf) return '';
+  const page = await AppState.slide.pdf.getPage(p);
+  const content = await page.getTextContent();
+  return content.items.map(i => i.str).join(' ').replace(/\s+/g, ' ').trim();
+}
+async function renderSlide(p) {
+  if (!AppState.slide.pdf) return;
+  const page     = await AppState.slide.pdf.getPage(p);
+  const _cw   = slideCanvas.parentElement.clientWidth || slideCanvas.offsetWidth || 640;
+  const scale = _cw / page.getViewport({ scale: 1 }).width;
+  const viewport = page.getViewport({ scale });
+  slideCanvas.width = viewport.width; slideCanvas.height = viewport.height;
+  await page.render({ canvasContext: canvasCtx, viewport }).promise;
+  pageInfo.textContent = `${AppState.slide.currentPage} / ${AppState.slide.totalPages}`;
+  btnPrev.disabled = AppState.slide.currentPage <= 1;
+  btnNext.disabled = AppState.slide.currentPage >= AppState.slide.totalPages;
+  loadScriptForPage(p);
+  loadNotesForPage(p);
+}
+
+pdfUpload.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  uploadWarn.style.display = 'none';
+  if (!file) return;
+  if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) {
+    uploadWarn.textContent = '⚠ 目前僅支援 PDF 檔案，請先將 PPT 或 Word 轉為 PDF 再上傳。';
+    uploadWarn.style.display = 'block'; return;
+  }
+  if (file.size > MAX_SIZE) {
+    uploadWarn.textContent = `⚠ 檔案超過 20 MB（目前 ${(file.size/1024/1024).toFixed(1)} MB），請壓縮後再上傳。`;
+    uploadWarn.style.display = 'block'; return;
+  }
+  AppState.slide.filename = file.name;
+  if (!_pdfReady) {
+    uploadWarn.textContent = '⚠ PDF.js 未載入，請確認網路連線後重新整理頁面。';
+    uploadWarn.style.display = 'block'; return;
+  }
+  const buffer = await file.arrayBuffer();
+  try {
+    AppState.slide.pdf        = await pdfjsLib.getDocument({ data: buffer }).promise;
+    AppState.slide.totalPages = AppState.slide.pdf.numPages;
+    AppState.slide.currentPage = 1;
+    await renderSlide(1);
+    try { pdfUpload.value = ''; } catch(_) {}
+  } catch(_) { pageInfo.textContent = '❌ PDF 載入失敗，請確認網路連線（需要網路載入 PDF.js）'; }
+});
+document.getElementById('btn-extract-text').addEventListener('click', async () => {
+  const text = await extractPageText(AppState.slide.currentPage);
+  if (text) {
+    slideScriptEl.value = text; saveScript(AppState.slide.currentPage, text); showHint(scriptSaveHint);
+  } else { alert('此頁無可擷取的文字內容'); }
+});
+async function changePage(delta) {
+  const next = AppState.slide.currentPage + delta;
+  if (next < 1 || next > AppState.slide.totalPages) return;
+  saveScript(AppState.slide.currentPage, slideScriptEl.value);
+  saveCurrentNotes();
+  AppState.slide.currentPage = next;
+  await renderSlide(next);
+}
+btnPrev.addEventListener('click', () => changePage(-1));
+btnNext.addEventListener('click', () => changePage(1));
+document.addEventListener('keydown', async (e) => {
+  if (!AppState.slide.pdf) return;
+  if (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT') return;
+  if (e.key === 'ArrowLeft')  changePage(-1);
+  if (e.key === 'ArrowRight') changePage(1);
+});
+
+// ── Export ────────────────────────────────────────────────────────────────────
+function _br(s) { return (s || '').replace(/\n/g, '<br>'); }
+function buildFullScript() {
+  const total = AppState.slide.totalPages || 0;
+  if (!total) return '<p>尚無口說稿內容，請先上傳 PDF 並編輯各頁備註。</p>';
+  const scripts = getScripts();
+  const allNotes = getAllNotes();
+  let html = '';
+  for (let i = 1; i <= total; i++) {
+    const n = allNotes[i] || { key: '', reminder: '', question: '' };
+    html += `<div class="print-script-title">第 ${i} 頁</div>`;
+    html += `<p class="print-note-label">口說稿：</p><p class="print-note-value">${_br(scripts[i]) || '（尚無內容）'}</p>`;
+    html += `<p class="print-note-label">本頁重點：</p><p class="print-note-value">${_br(n.key) || '—'}</p>`;
+    html += `<p class="print-note-label">提醒事項：</p><p class="print-note-value">${_br(n.reminder) || '—'}</p>`;
+    html += `<p class="print-note-label">可能被問的問題：</p><p class="print-note-value" style="margin-bottom:16px;">${_br(n.question) || '—'}</p>`;
+  }
+  return html;
+}
+document.getElementById('btn-export-word').addEventListener('click', () => {
+  const total = AppState.slide.totalPages || 0;
+  if (!total) { alert('請先上傳 PDF'); return; }
+  const scripts = getScripts();
+  const allNotes = getAllNotes();
+  let body = '<html><head><meta charset="UTF-8"><style>'
+    + 'body{font-family:serif;font-size:12pt;line-height:1.8;margin:2cm;}'
+    + 'h2{font-size:14pt;margin-top:24pt;border-bottom:1px solid #999;padding-bottom:4pt;}'
+    + 'h3{font-size:11pt;color:#444;margin:10pt 0 2pt;font-style:italic;}'
+    + 'p{margin:0 0 6pt 12pt;white-space:pre-wrap;}'
+    + '</style></head><body>';
+  body += `<h1 style="font-size:16pt;">簡報發表口說文字稿</h1><p style="color:#666;margin:0;">Presentation Practice System</p><hr>`;
+  for (let i = 1; i <= total; i++) {
+    const n = allNotes[i] || { key: '', reminder: '', question: '' };
+    body += `<h2>第 ${i} 頁</h2>`;
+    body += `<h3>口說稿：</h3><p>${_br(scripts[i]) || '（尚無內容）'}</p>`;
+    body += `<h3>本頁重點：</h3><p>${_br(n.key) || '—'}</p>`;
+    body += `<h3>提醒事項：</h3><p>${_br(n.reminder) || '—'}</p>`;
+    body += `<h3>可能被問的問題：</h3><p>${_br(n.question) || '—'}</p>`;
+  }
+  body += '</body></html>';
+  const blob = new Blob([body], { type: 'application/msword' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = '簡報發表口說稿.doc';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 100);
+});
+document.getElementById('btn-export-pdf').addEventListener('click', () => {
+  if (!AppState.slide.totalPages) { alert('請先上傳 PDF'); return; }
+  document.getElementById('print-all-scripts').innerHTML =
+    `<h1 style="font-size:1.4rem;margin-bottom:12px;">簡報發表口說文字稿</h1>${buildFullScript()}`;
+  window.print();
+});
+
+// ── Practice Notes ────────────────────────────────────────────────────────────
+let noteDraftTimer = null;
+
+logNoteEl.addEventListener('input', () => {
+  clearTimeout(noteDraftTimer);
+  noteDraftTimer = setTimeout(() => {
+    const key = lsKey('note-draft');
+    if (key) localStorage.setItem(key, logNoteEl.value);
+  }, 800);
+});
+
+function saveSessionEntry() {
+  const now = new Date();
+  const datetime = now.toLocaleString('zh-TW', {
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+  });
+  const entry = {
+    username:      AppState.user.name,
+    datetime,
+    scenario:      AppState.user.scenario,
+    mode:          getModeLabel(AppState.mode),
+    filename:      AppState.slide.filename || '（未上傳）',
+    qaTimeConfig:  AppState.qa.timeConfig,
+    questionsUsed: [...AppState.session.questionsUsed],
+    reflection:    logNoteEl.value.trim(),
+    duration:      AppState.timer.configured - AppState.timer.remaining,
+    completed:     AppState.timer.started && AppState.timer.remaining > 0,
+  };
+  AppState.logs.push(entry);
+  if (AppState.logs.length > 50) AppState.logs.splice(0, AppState.logs.length - 50);
+  persistLogs(); renderLogs();
+  AppState.session.questionsUsed = [];
+}
+
+document.getElementById('btn-save-note').addEventListener('click', () => {
+  const key = lsKey('note-draft');
+  if (key) localStorage.setItem(key, logNoteEl.value);
+  showHint(noteSaveHint);
+  saveSessionEntry();
+});
+
+document.getElementById('btn-clear-note').addEventListener('click', () => {
+  if (logNoteEl.value && !confirm('確定要清空筆記？')) return;
+  logNoteEl.value = '';
+  const key = lsKey('note-draft');
+  if (key) localStorage.removeItem(key);
+});
+
+document.getElementById('btn-download-note').addEventListener('click', () => {
+  const now = new Date().toLocaleString('zh-TW', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  });
+  const qs = AppState.session.questionsUsed.length
+    ? '\n  ' + AppState.session.questionsUsed.join('\n  ')
+    : '（無）';
+  const allNotes = getAllNotes();
+  const total = AppState.slide.totalPages || 0;
+  const hasContent = n => !!(n && ((n.key||'').trim() || (n.reminder||'').trim() || (n.question||'').trim()));
+  const fmtNote = (i, n) =>
+    `第 ${i} 頁：\n本頁重點：${n.key || '—'}\n提醒事項：${n.reminder || '—'}\n可能被問的問題：${n.question || '—'}`;
+  let notesBlock;
+  if (total > 0) {
+    const parts = [];
+    for (let i = 1; i <= total; i++) {
+      const n = allNotes[i] || { key: '', reminder: '', question: '' };
+      if (hasContent(n)) parts.push(fmtNote(i, n));
+    }
+    notesBlock = parts.length ? parts.join('\n\n') : '（尚無備註）';
+  } else {
+    const pages = Object.keys(allNotes).map(Number).sort((a, b) => a - b).filter(i => hasContent(allNotes[i]));
+    notesBlock = pages.length ? pages.map(i => fmtNote(i, allNotes[i])).join('\n\n') : '（尚無備註）';
+  }
+  const lines = [
+    '===== 簡報發表練習紀錄 =====',
+    `練習者：${AppState.user.name || '—'}`,
+    `日期時間：${now}`,
+    `練習情境：${AppState.user.scenario || '—'}`,
+    `練習模式：${getModeLabel(AppState.mode)}`,
+    `上傳檔案：${AppState.slide.filename || '—'}`,
+    `Q&A 練習題目：${qs}`,
+    '',
+    '===== 各頁備註 =====',
+    notesBlock,
+    '',
+    '===== 練習筆記 =====',
+    logNoteEl.value || '（無）',
+  ].join('\n');
+  const blob = new Blob(['﻿' + lines], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `練習紀錄-${sanitizeKey(AppState.user.name) || '未命名使用者'}.txt`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 100);
+});
+
+// ── Speech Recognition ────────────────────────────────────────────────────────
+const SpeechRec    = window.SpeechRecognition || window.webkitSpeechRecognition;
+const btnSpeech    = document.getElementById('btn-speech');
+const recDotEl     = document.getElementById('rec-dot');
+const recStatusEl  = document.getElementById('rec-status');
+const interimEl    = document.getElementById('interim-text');
+const diffResultEl = document.getElementById('diff-result');
+let recognition = null, finalTranscript = '', isRecording = false;
+
+function tokenizeMixed(text) {
+  const norm = text.toLowerCase()
+    .replace(/[，。！？、；：""''「」【】（）《》\.,!?;:'"\-]/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+  const tokens = []; let i = 0;
+  while (i < norm.length) {
+    const c = norm[i];
+    if (/[一-鿿぀-ヿ가-힯]/.test(c)) { tokens.push(c); i++; }
+    else if (/[a-z0-9]/.test(c)) {
+      let w = '';
+      while (i < norm.length && /[a-z0-9]/.test(norm[i])) w += norm[i++];
+      if (w) tokens.push(w);
+    } else { i++; }
+  }
+  return tokens;
+}
+function annotateScript(scriptText, spokenText) {
+  const spokenSet = new Set(tokenizeMixed(spokenText));
+  const segments = []; let i = 0;
+  while (i < scriptText.length) {
+    const c = scriptText[i];
+    if (/[一-鿿぀-ヿ가-힯]/.test(c)) {
+      segments.push({ text: c, type: 'cjk', found: spokenSet.has(c.toLowerCase()) }); i++;
+    } else if (/[a-zA-Z0-9]/.test(c)) {
+      let w = '';
+      while (i < scriptText.length && /[a-zA-Z0-9]/.test(scriptText[i])) w += scriptText[i++];
+      segments.push({ text: w, type: 'word', found: spokenSet.has(w.toLowerCase()) });
+    } else { segments.push({ text: c, type: 'other', found: true }); i++; }
+  }
+  const meaningful = segments.filter(s => s.type !== 'other');
+  const matched    = meaningful.filter(s => s.found).length;
+  const pct        = meaningful.length > 0 ? Math.round(matched / meaningful.length * 100) : 0;
+  let html = '';
+  for (const seg of segments) {
+    const safe = seg.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    html += seg.type === 'other' ? safe : seg.found ? `<span class="w-match">${safe}</span>` : `<span class="w-miss">${safe}</span>`;
+  }
+  return { html, pct, matched, total: meaningful.length };
+}
+function showDiff(spokenText) {
+  const scriptText = slideScriptEl.value.trim();
+  if (!scriptText) {
+    diffResultEl.style.display = 'block';
+    diffResultEl.innerHTML = `<div class="spoken-text">🎤 辨識結果：${spokenText || '（無）'}</div>`;
+    return;
+  }
+  const { html, pct, matched, total } = annotateScript(scriptText, spokenText);
+  const cls = pct >= 80 ? 'score-good' : pct >= 55 ? 'score-ok' : 'score-low';
+  const lbl = pct >= 80 ? '✓ 很好' : pct >= 55 ? '△ 尚可' : '✗ 需加強';
+  diffResultEl.innerHTML = `
+    <span class="score-badge ${cls}">${lbl}　覆蓋率 ${pct}%（${matched} / ${total}）</span>
+    <div class="diff-body">${html}</div>
+    <div class="spoken-text">🎤 辨識結果：${spokenText || '（無）'}</div>`;
+  diffResultEl.style.display = 'block';
+}
+if (!SpeechRec) {
+  btnSpeech.disabled = true; recStatusEl.textContent = '⚠ 請使用 Chrome 或 Edge';
+} else {
+  btnSpeech.addEventListener('click', () => isRecording ? recognition.stop() : startSpeechRec());
+}
+function startSpeechRec() {
+  finalTranscript = ''; diffResultEl.style.display = 'none'; interimEl.textContent = '聆聽中…';
+  recognition = new SpeechRec();
+  const langSel = document.getElementById('speech-lang').value;
+  recognition.lang = langSel === 'zh-TW-en' ? 'zh-TW' : langSel;
+  recognition.continuous = true; recognition.interimResults = true;
+  recognition.onstart = () => {
+    isRecording = true; btnSpeech.textContent = '⏹ 停止'; btnSpeech.className = 'btn-danger';
+    recDotEl.classList.add('active'); recStatusEl.textContent = '錄音中…';
+  };
+  recognition.onresult = (e) => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    interimEl.textContent = finalTranscript + interim || '聆聽中…';
+  };
+  recognition.onend = () => {
+    isRecording = false; btnSpeech.textContent = '🎤 開始朗讀'; btnSpeech.className = 'btn-warning';
+    recDotEl.classList.remove('active'); recStatusEl.textContent = '';
+    if (document.getElementById('speech-lang').value === 'zh-TW-en' && finalTranscript.trim()) {
+      const rec2 = new SpeechRec();
+      rec2.lang = 'en-US'; rec2.continuous = false; rec2.interimResults = false;
+      recStatusEl.textContent = '補捉英文詞…';
+      let enExtra = '';
+      rec2.onresult = (e) => { for (let i = 0; i < e.results.length; i++) enExtra += e.results[i][0].transcript + ' '; };
+      rec2.onend   = () => { recStatusEl.textContent = ''; showDiff((finalTranscript + ' ' + enExtra).trim()); };
+      rec2.onerror = () => { recStatusEl.textContent = ''; showDiff(finalTranscript.trim()); };
+      rec2.start();
+    } else { showDiff(finalTranscript.trim()); }
+  };
+  recognition.onerror = (e) => {
+    isRecording = false; btnSpeech.textContent = '🎤 開始朗讀'; btnSpeech.className = 'btn-warning';
+    recDotEl.classList.remove('active');
+    recStatusEl.textContent =
+      e.error === 'not-allowed' ? '⚠ 請允許麥克風權限' :
+      e.error === 'no-speech'   ? '⚠ 未偵測到聲音' : `⚠ ${e.error}`;
+  };
+  recognition.start();
+}
+
+// ── Q&A ───────────────────────────────────────────────────────────────────────
+function loadQuestions() {
+  const key = lsKey('questions');
+  try { questionBank = key ? JSON.parse(localStorage.getItem(key) || '[]') : []; }
+  catch(_) { questionBank = []; }
+  renderQuestionList();
+}
+function persistQuestions() {
+  const key = lsKey('questions');
+  if (key) localStorage.setItem(key, JSON.stringify(questionBank));
+}
+function renderQuestionList() {
+  const list = document.getElementById('qa-item-list');
+  const ctr  = document.getElementById('qa-count');
+  ctr.textContent = `共 ${questionBank.length} 題`;
+  list.innerHTML = '';
+  if (!questionBank.length) { list.innerHTML = '<p style="color:#aaa;font-size:0.82rem;">尚無題目，請新增。</p>'; return; }
+  questionBank.forEach((item, i) => {
+    const d = document.createElement('div'); d.className = 'qa-item';
+    d.innerHTML = `
+      <div class="qa-item-text">
+        <div class="qa-item-q">Q${i+1}. ${item.q}</div>
+        <div class="qa-item-a">A: ${item.a}</div>
+      </div>
+      <button class="qa-item-del" data-idx="${i}" title="刪除">✕</button>`;
+    list.appendChild(d);
+  });
+  list.querySelectorAll('.qa-item-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      questionBank.splice(parseInt(btn.dataset.idx), 1); persistQuestions(); renderQuestionList();
+    });
+  });
+}
+document.getElementById('btn-toggle-manager').addEventListener('click', () => {
+  const body = document.getElementById('qa-manager-body');
+  const btn  = document.getElementById('btn-toggle-manager');
+  const open = body.classList.toggle('open');
+  btn.textContent = (open ? '▼' : '▶') + ' 管理題目';
+});
+document.getElementById('btn-add-question').addEventListener('click', () => {
+  const qEl = document.getElementById('input-q'), aEl = document.getElementById('input-a');
+  const q = qEl.value.trim(), a = aEl.value.trim();
+  if (!q || !a) { alert('請輸入問題和參考答案'); return; }
+  questionBank.push({ q, a }); persistQuestions(); renderQuestionList();
+  qEl.value = ''; aEl.value = '';
+});
+
+const qaTimeSelect  = document.getElementById('qa-time-select');
+const questionBox   = document.getElementById('question-box');
+const answerBox     = document.getElementById('answer-box');
+const answerTimerEl = document.getElementById('answer-timer');
+const qaTimeUp      = document.getElementById('qa-time-up');
+const btnDraw       = document.getElementById('btn-draw');
+const btnPauseQA    = document.getElementById('btn-qa-pause');
+const btnResetQA    = document.getElementById('btn-qa-reset');
+const btnShowAnswer = document.getElementById('btn-show-answer');
+const userAnswerEl  = document.getElementById('user-answer');
+
+qaTimeSelect.addEventListener('change', () => {
+  AppState.qa.timeConfig = parseInt(qaTimeSelect.value);
+  if (AppState.qa.currentIndex < 0) {
+    AppState.qa.answerRemaining = AppState.qa.timeConfig; refreshAnswerTimer();
+  }
+});
+function refreshAnswerTimer() {
+  answerTimerEl.textContent = fmt(AppState.qa.answerRemaining);
+  answerTimerEl.classList.toggle('warning', AppState.qa.answerRemaining <= 30);
+}
+function _qaStartInterval() {
+  return setInterval(() => {
+    AppState.qa.answerRemaining = Math.max(0, AppState.qa.answerRemaining - 1);
+    refreshAnswerTimer();
+    if (AppState.qa.answerRemaining === 0) {
+      clearInterval(AppState.qa.answerInterval);
+      AppState.qa.paused = false;
+      const _bp = document.getElementById('btn-qa-pause');
+      if (_bp) { _bp.textContent = '暫停'; _bp.disabled = true; }
+      qaTimeUp.style.display = 'block'; playBeep();
+    }
+  }, 1000);
+}
+function startAnswerTimer() {
+  clearInterval(AppState.qa.answerInterval);
+  AppState.qa.paused          = false;
+  AppState.qa.answerRemaining = AppState.qa.timeConfig;
+  qaTimeUp.style.display = 'none'; answerTimerEl.classList.remove('warning'); refreshAnswerTimer();
+  AppState.qa.answerInterval = _qaStartInterval();
+}
+btnDraw.addEventListener('click', () => {
+  if (!questionBank.length) { questionBox.textContent = '⚠ 尚無題目，請先在「管理題目」新增問題。'; return; }
+  let idx;
+  do { idx = Math.floor(Math.random() * questionBank.length); }
+  while (questionBank.length > 1 && idx === AppState.qa.lastIndex);
+  AppState.qa.lastIndex = idx; AppState.qa.currentIndex = idx;
+  const q = questionBank[idx];
+  questionBox.textContent = `Q${idx+1}. ${q.q}`;
+  AppState.session.questionsUsed.push(`Q${idx+1}: ${q.q}`);
+  userAnswerEl.value = ''; userAnswerEl.style.display = 'block';
+  answerBox.textContent = ''; answerBox.style.display = 'none';
+  btnShowAnswer.textContent = '顯示答案'; btnShowAnswer.disabled = false;
+  startAnswerTimer();
+  const _bp = document.getElementById('btn-qa-pause');
+  if (_bp) { _bp.textContent = '暫停'; _bp.disabled = false; }
+  const _brst = document.getElementById('btn-qa-reset');
+  if (_brst) _brst.disabled = false;
+});
+btnShowAnswer.addEventListener('click', () => {
+  if (AppState.qa.currentIndex < 0) return;
+  if (answerBox.style.display !== 'none') {
+    answerBox.style.display = 'none'; btnShowAnswer.textContent = '顯示答案';
+  } else {
+    answerBox.textContent = questionBank[AppState.qa.currentIndex].a;
+    answerBox.style.display = 'block'; btnShowAnswer.textContent = '隱藏答案';
+  }
+});
+btnPauseQA.addEventListener('click', () => {
+  if (AppState.qa.currentIndex < 0) return;
+  if (AppState.qa.paused) {
+    AppState.qa.paused = false;
+    btnPauseQA.textContent = '暫停';
+    AppState.qa.answerInterval = _qaStartInterval();
+  } else {
+    AppState.qa.paused = true;
+    clearInterval(AppState.qa.answerInterval);
+    AppState.qa.answerInterval = null;
+    btnPauseQA.textContent = '繼續';
+  }
+});
+btnResetQA.addEventListener('click', () => {
+  if (AppState.qa.currentIndex < 0) return;
+  clearInterval(AppState.qa.answerInterval);
+  AppState.qa.paused          = false;
+  AppState.qa.answerRemaining = AppState.qa.timeConfig;
+  btnPauseQA.textContent = '暫停'; btnPauseQA.disabled = false;
+  qaTimeUp.style.display = 'none';
+  answerTimerEl.classList.remove('warning');
+  refreshAnswerTimer();
+  userAnswerEl.value = '';
+  answerBox.textContent = ''; answerBox.style.display = 'none';
+  btnShowAnswer.textContent = '顯示答案';
+  AppState.qa.answerInterval = _qaStartInterval();
+});
+
+document.getElementById('btn-download-qa').addEventListener('click', () => {
+  if (!questionBank.length) { alert('目前沒有題目可下載。'); return; }
+  const uname = sanitizeKey(AppState.user.name) || '未命名使用者';
+  const text = questionBank.map((q, i) => `Q${i+1}. ${q.q}\nA: ${q.a}`).join('\n\n');
+  const blob = new Blob(['﻿' + text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `qa-questions-${uname}.txt`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 100);
+});
+
+// ── Data Management ───────────────────────────────────────────────────────────
+const dmMsgEl = document.getElementById('dm-msg');
+function showDmMsg(msg, type) {
+  dmMsgEl.textContent = msg;
+  dmMsgEl.className = 'dm-msg ' + type;
+  setTimeout(() => { dmMsgEl.className = 'dm-msg'; }, 4000);
+}
+
+function resetSlide() {
+  ['scripts', 'notes', 'note-draft'].forEach(s => {
+    const k = lsKey(s); if (k) localStorage.removeItem(k);
+  });
+  AppState.slide.pdf = null;
+  AppState.slide.currentPage = 1;
+  AppState.slide.totalPages = 0;
+  AppState.slide.filename = '';
+  canvasCtx.clearRect(0, 0, slideCanvas.width, slideCanvas.height);
+  pageInfo.textContent = '尚未載入 PDF';
+  btnPrev.disabled = true;
+  btnNext.disabled = true;
+  slideScriptEl.value = '';
+  noteKeyEl.value = '';
+  noteReminderEl.value = '';
+  noteQEl.value = '';
+  scriptSection.style.display = 'none';
+  notesSection.style.display = 'none';
+  pdfUpload.value = '';
+  uploadWarn.style.display = 'none';
+  logNoteEl.value = '';
+}
+
+document.getElementById('btn-feedback').addEventListener('click', () => {
+  window.open('https://docs.google.com/forms/d/e/1FAIpQLSeZprvfWkD2hoWYaQzbb9hgtNOhpDrtt0uuUDDfmDhKR47Awg/viewform', '_blank', 'noopener,noreferrer');
+});
+
+document.getElementById('btn-dm-clear').addEventListener('click', () => {
+  if (!AppState.user.name) { alert('請先設定使用者名稱。'); return; }
+  if (!confirm(`確定要清除使用者「${AppState.user.name}」的所有資料嗎？此動作無法復原。`)) return;
+  const k = sanitizeKey(AppState.user.name);
+  const toRemove = [];
+  const _dmSuffixes = ['logs', 'notes', 'questions', 'scripts', 'note-draft'];
+  for (let i = 0; i < localStorage.length; i++) {
+    const lk = localStorage.key(i);
+    if (!lk) continue;
+    for (const s of _dmSuffixes) {
+      if (lk === `pps-${s}-${k}` || lk.startsWith(`pps-${s}-${k}-`)) { toRemove.push(lk); break; }
+    }
+  }
+  toRemove.forEach(lk => localStorage.removeItem(lk));
+  AppState.logs = []; renderLogs();
+  questionBank = []; renderQuestionList();
+  resetSlide();
+  showDmMsg('已清除目前使用者的所有資料。', 'success');
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+AppState.qa.timeConfig = parseInt(qaTimeSelect.value);
+refreshTimerDisplay();
+refreshAnswerTimer();
+
+window.addEventListener('beforeunload', (e) => {
+  const hasNote    = logNoteEl.value.trim();
+  const hasScripts = Object.values(getScripts()).some(v => v && v.trim());
+  const hasNotes   = Object.values(getAllNotes()).some(n => !!(n && ((n.key||'').trim() || (n.reminder||'').trim() || (n.question||'').trim())));
+  const hasQA      = questionBank.length > 0;
+  if (hasNote || hasScripts || hasNotes || hasQA) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+</script>
 </body>
 </html>
