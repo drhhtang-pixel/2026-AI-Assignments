@@ -5,6 +5,7 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { checkExternalUrl } = require('./lib/sanitize');
 
 function fail(message) {
   console.error(`ERROR: ${message}`);
@@ -69,6 +70,11 @@ if (hyphenIdx === -1 || dirName.slice(hyphenIdx + 1).length === 0) {
   fail(`Directory name must match pattern <student-id>-<name> (name portion is empty: "${dirName}")`);
 }
 
+// Folder names appear in the public gallery; refuse HTML/URL-special characters
+if (/[<>"'&`\\?#%]/.test(dirName)) {
+  fail(`Directory name must not contain < > " ' & \` \\ ? # % (got: ${JSON.stringify(dirName)})`);
+}
+
 // --- 5. Required files present ---
 const submissionPath = path.join('submissions', dirName);
 
@@ -96,8 +102,9 @@ const thumbPath = path.join(submissionPath, foundThumb);
 if (hasUrl) {
   const urlContent = fs.readFileSync(urlPath, 'utf8');
   const firstLine = urlContent.split('\n').map(l => l.trim()).find(l => l.length > 0) || '';
-  if (!firstLine.startsWith('https://')) {
-    fail(`url.txt must contain a valid https:// URL (got: "${firstLine}")`);
+  const check = checkExternalUrl(firstLine);
+  if (!check.ok) {
+    fail(`url.txt must contain a valid https:// URL: ${check.reason} (got: ${JSON.stringify(firstLine)})`);
   }
 }
 

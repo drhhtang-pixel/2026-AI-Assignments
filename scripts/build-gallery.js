@@ -3,19 +3,29 @@
 // Run from repo root: node scripts/build-gallery.js
 // No npm install required — Node.js built-ins only.
 
+//
+// Everything taken from submissions (folder names, <title>, url.txt) is
+// untrusted: text is HTML-escaped, path segments are percent-encoded, and
+// external links must pass checkExternalUrl() or the card gets no link.
+//
+// GALLERY_SUBMISSIONS_DIR / GALLERY_OUT_DIR override the input and output
+// locations (used by scripts/test-build-gallery.js); CI does not set them.
+
 const fs = require('fs');
 const path = require('path');
+const { escapeHtml, decodeBasicEntities, encodePathSegment, checkExternalUrl } = require('./lib/sanitize');
 
-const SUBMISSIONS_DIR = path.join(__dirname, '..', 'submissions');
-const OUTPUT_FILE = path.join(__dirname, '..', 'index.html');
-const JSON_OUTPUT_FILE = path.join(__dirname, '..', 'gallery.json');
+const SUBMISSIONS_DIR = process.env.GALLERY_SUBMISSIONS_DIR || path.join(__dirname, '..', 'submissions');
+const OUT_DIR = process.env.GALLERY_OUT_DIR || path.join(__dirname, '..');
+const OUTPUT_FILE = path.join(OUT_DIR, 'index.html');
+const JSON_OUTPUT_FILE = path.join(OUT_DIR, 'gallery.json');
 const BASE_URL = 'https://drhhtang-pixel.github.io/2026-AI-Assignments';
 
 function extractTitle(htmlPath) {
   try {
     const content = fs.readFileSync(htmlPath, 'utf8');
     const match = content.match(/<title[^>]*>([^<]+)<\/title>/i);
-    return match ? match[1].trim() : '(無標題)';
+    return match ? decodeBasicEntities(match[1]).trim() : '(無標題)';
   } catch {
     return '(無標題)';
   }
@@ -39,13 +49,26 @@ const exampleExists = fs.existsSync(path.join(SUBMISSIONS_DIR, 'EXAMPLE-範例')
 
 const allDirs = exampleExists ? [...entries, 'EXAMPLE-範例'] : entries;
 
+// Cached so each rejected link is warned about once (index.html and gallery.json both read it)
+const urlTxtCache = new Map();
 function readUrlTxt(dirPath) {
+  if (!urlTxtCache.has(dirPath)) urlTxtCache.set(dirPath, readUrlTxtUncached(dirPath));
+  return urlTxtCache.get(dirPath);
+}
+
+function readUrlTxtUncached(dirPath) {
   try {
     const lines = fs.readFileSync(path.join(dirPath, 'url.txt'), 'utf8')
       .split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    const url = lines[0] || null;
+    const rawUrl = lines[0] || null;
     const title = lines[1] || null;   // optional second line
-    return url ? { url, title } : null;
+    if (!rawUrl) return null;
+    // url is null when the link is unsafe; the card is then shown without a link
+    const check = checkExternalUrl(rawUrl);
+    if (!check.ok) {
+      console.warn(`WARNING: ignoring url.txt link in ${path.basename(dirPath)}: ${check.reason}`);
+    }
+    return { url: check.ok ? check.url : null, title };
   } catch {
     return null;
   }
@@ -54,11 +77,12 @@ function readUrlTxt(dirPath) {
 function buildCard(dirName) {
   const dirPath = path.join(SUBMISSIONS_DIR, dirName);
   const thumbFile = findThumbnail(dirPath);
-  const thumbSrc = thumbFile ? `submissions/${dirName}/${thumbFile}` : null;
+  const dirSegment = encodePathSegment(dirName);
+  const thumbSrc = thumbFile ? `submissions/${dirSegment}/${thumbFile}` : null;
 
   const urlInfo = readUrlTxt(dirPath);
   const isExternal = urlInfo !== null;
-  const linkHref = isExternal ? urlInfo.url : `submissions/${dirName}/index.html`;
+  const linkHref = isExternal ? urlInfo.url : `submissions/${dirSegment}/index.html`;
   // Title priority: url.txt second line → html <title> → directory name
   const title = isExternal
     ? (urlInfo.title || dirName)
@@ -66,18 +90,23 @@ function buildCard(dirName) {
   const badge = isExternal ? `<span style="font-size:11px;color:#7eb8f7;margin-left:6px;">🔗 外部連結</span>` : '';
 
   const thumbnail = thumbSrc
-    ? `<img src="${thumbSrc}" alt="${title}" style="width:100%;height:300px;object-fit:cover;display:block;">`
+    ? `<img src="${escapeHtml(thumbSrc)}" alt="${escapeHtml(title)}" style="width:100%;height:300px;object-fit:cover;display:block;">`
     : `<div style="width:100%;height:300px;background:#ccc;display:flex;align-items:center;justify-content:center;color:#666;font-size:14px;">No Thumbnail</div>`;
+
+  const linkOpen = linkHref
+    ? `<a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener" style="display:block;text-decoration:none;color:inherit;">`
+    : `<div style="display:block;color:inherit;">`;
+  const linkClose = linkHref ? '</a>' : '</div>';
 
   return `
     <div style="border:1px solid #ddd;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.08);">
-      <a href="${linkHref}" target="_blank" rel="noopener" style="display:block;text-decoration:none;color:inherit;">
+      ${linkOpen}
         ${thumbnail}
         <div style="padding:12px 14px;">
-          <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:#222;">${title}${badge}</div>
-          <div style="font-size:12px;color:#888;">${dirName}</div>
+          <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:#222;">${escapeHtml(title)}${badge}</div>
+          <div style="font-size:12px;color:#888;">${escapeHtml(dirName)}</div>
         </div>
-      </a>
+      ${linkClose}
     </div>`;
 }
 
@@ -137,21 +166,24 @@ console.log(`✓ Gallery built: ${count} submission(s) → index.html`);
 // Generate gallery.json (excludes EXAMPLE-範例)
 const jsonEntries = entries.map(dirName => {
   const dirPath = path.join(SUBMISSIONS_DIR, dirName);
+  const dirSegment = encodePathSegment(dirName);
   const thumbFile = findThumbnail(dirPath);
   const urlInfo = readUrlTxt(dirPath);
   const isExternal = urlInfo !== null;
   const title = isExternal
     ? (urlInfo.title || dirName)
     : extractTitle(path.join(dirPath, 'index.html'));
+  // dirName and title stay as plain text: consumers must escape them before
+  // inserting into HTML. href is null when url.txt held an unsafe link.
   return {
     dirName,
     title,
     href: isExternal
       ? urlInfo.url
-      : `${BASE_URL}/submissions/${dirName}/index.html`,
+      : `${BASE_URL}/submissions/${dirSegment}/index.html`,
     isExternal,
     thumbnail: thumbFile
-      ? `${BASE_URL}/submissions/${dirName}/${thumbFile}`
+      ? `${BASE_URL}/submissions/${dirSegment}/${thumbFile}`
       : null,
   };
 });
