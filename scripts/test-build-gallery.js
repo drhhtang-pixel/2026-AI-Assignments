@@ -35,6 +35,12 @@ test('decodeBasicEntities + escapeHtml does not double-escape', () => {
   assert.strictEqual(escapeHtml(decodeBasicEntities('A &amp; B &#60;x&#x3E;')), 'A &amp; B &lt;x&gt;');
 });
 
+test('decodeBasicEntities leaves control, surrogate and out-of-range code points as text', () => {
+  for (const e of ['&#1;', '&#x1F;', '&#xD800;', '&#57343;', '&#x110000;', '&#99999999;']) {
+    assert.strictEqual(decodeBasicEntities(e), e);
+  }
+});
+
 const accepted = [
   ['https://example.com/', 'https://example.com/'],
   ['https://example.com/a?b=1&c=2#top', 'https://example.com/a?b=1&c=2#top'],
@@ -62,6 +68,8 @@ const rejected = [
   'https://example.com/`x`',
   'https://example.com\\@evil.example/',
   'https://user:pass@example.com/',
+  'https://%75ser@example.com/',
+  'https://%22.example/',
   'https://',
   '',
 ];
@@ -99,6 +107,22 @@ addSubmission('T006-space', { 'url.txt': 'https://example.com/ onmouseover=alert
 addSubmission('T007-ok', { 'url.txt': 'https://example.com/a?b=1&c=2\r\nA & B\r\n' });
 addSubmission('T008-entity', { 'index.html': '<title>Tom &amp; Jerry</title>' });
 addSubmission("T009-single'quote", { 'index.html': "<title>it's</title>" });
+// Uses only tags/attributes the template itself uses, so a name-allowlist alone would miss it
+addSubmission('T010-allowed-tags', { 'url.txt': 'https://example.com/\n<img src="https://example.com/t.png" style="position:fixed">\n' });
+
+// Expected card shape, in sorted folder order: link = card wrapped in <a>, badge = external-link <span>
+const CARDS = [
+  { dir: 'T001-<img src=x onerror=alert(1)>', link: true, badge: false },
+  { dir: 'T002-quote"onmouseover="alert(2)', link: true, badge: false },
+  { dir: 'T003-js', link: false, badge: true },
+  { dir: 'T004-data', link: false, badge: true },
+  { dir: 'T005-breakout', link: false, badge: true },
+  { dir: 'T006-space', link: false, badge: true },
+  { dir: 'T007-ok', link: true, badge: true },
+  { dir: 'T008-entity', link: true, badge: false },
+  { dir: "T009-single'quote", link: true, badge: false },
+  { dir: 'T010-allowed-tags', link: true, badge: true },
+];
 
 const run = spawnSync(process.execPath, [path.join(__dirname, 'build-gallery.js')], {
   env: { ...process.env, GALLERY_SUBMISSIONS_DIR: subDir, GALLERY_OUT_DIR: outDir },
@@ -118,7 +142,8 @@ const ALLOWED_ATTRS = new Set(['lang', 'charset', 'name', 'content', 'class', 's
   'target', 'rel', 'style']);
 
 // Every "<" must start a well-formed tag from the template's own vocabulary,
-// with only double-quoted attribute values. Injected markup cannot satisfy this.
+// with only double-quoted attribute values. This only checks names; the
+// per-card structure test below checks that no extra (allowed) tags appear.
 function scanTags(doc) {
   const tags = [];
   const openTag = /<([a-z0-9]+)((?:\s+[a-z-]+="[^"<>]*")*)\s*>/y;
@@ -130,6 +155,7 @@ function scanTags(doc) {
     let m = closeTag.exec(doc);
     if (m) {
       assert.ok(ALLOWED_TAGS.has(m[1]), `unexpected closing tag </${m[1]}>`);
+      tags.push({ name: `/${m[1]}`, attrs: {} });
       continue;
     }
     m = openTag.exec(doc);
@@ -146,8 +172,23 @@ function scanTags(doc) {
 }
 
 let tags = [];
-test('every tag and attribute comes from the template (no injected markup)', () => {
+test('every tag and attribute name is one the template uses', () => {
   tags = scanTags(html);
+});
+
+test('each card has exactly the template\'s tag structure (no extra nodes)', () => {
+  const start = tags.findIndex(t => t.name === 'div' && t.attrs.class === 'grid');
+  const end = tags.findIndex(t => t.name === '/main');
+  assert.ok(start !== -1 && end > start, 'grid not found');
+  const actual = tags.slice(start + 1, end - 1).map(t => t.name); // drop grid's own </div>
+  const expected = CARDS.flatMap(c => [
+    'div', c.link ? 'a' : 'div', 'img', 'div', 'div', ...(c.badge ? ['span', '/span'] : []), '/div',
+    'div', '/div', '/div', c.link ? '/a' : '/div', '/div',
+  ]);
+  assert.deepStrictEqual(actual, expected);
+  const imgs = tags.slice(start + 1, end - 1).filter(t => t.name === 'img');
+  assert.deepStrictEqual(imgs.map(t => t.attrs.src),
+    CARDS.map(c => escapeHtml(`submissions/${encodeURIComponent(c.dir)}/thumbnail.png`)));
 });
 
 test('no <script> and no event-handler attributes', () => {
@@ -166,8 +207,8 @@ test('every href is https:// or a relative submissions/ path', () => {
 test('unsafe url.txt links produce cards without a link', () => {
   const hrefs = tags.filter(t => t.name === 'a').map(t => t.attrs.href);
   assert.ok(!hrefs.some(h => /^(javascript|data):/i.test(h) || h.includes('example.com/%22')));
-  // T001, T002, T008, T009 (local) + T007 (valid external) + nav link
-  assert.strictEqual(hrefs.length, 6);
+  // T001, T002, T008, T009 (local) + T007, T010 (valid external) + nav link
+  assert.strictEqual(hrefs.length, 7);
 });
 
 test('valid external link keeps & escaped in the attribute', () => {
@@ -181,6 +222,7 @@ test('folder name and titles are shown as escaped text', () => {
   assert.ok(html.includes('alt="x&quot; onerror=&quot;alert(3)"'));
   assert.ok(html.includes('&lt;script&gt;alert(5)&lt;/script&gt;'));
   assert.ok(html.includes('T009-single&#39;quote'));
+  assert.ok(html.includes('&lt;img src=&quot;https://example.com/t.png&quot; style=&quot;position:fixed&quot;&gt;'));
 });
 
 test('folder names are percent-encoded in paths', () => {

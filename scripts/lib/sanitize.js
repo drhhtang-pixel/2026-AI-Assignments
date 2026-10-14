@@ -62,6 +62,10 @@ function checkExternalUrl(raw) {
   if (parsed.username || parsed.password) {
     return { ok: false, reason: 'URL must not contain a username or password' };
   }
+  // Normalization can decode characters (e.g. https://%22.example/ → a literal quote in the host)
+  if (FORBIDDEN_URL_CHARS.test(parsed.href)) {
+    return { ok: false, reason: 'normalized URL contains whitespace, control characters, quotes, <, >, ` or \\' };
+  }
   return { ok: true, url: parsed.href };
 }
 
