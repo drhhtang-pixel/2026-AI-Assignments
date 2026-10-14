@@ -3,8 +3,9 @@ openspec/
 .spectra.yaml
 .spectra/
 
-# Claude Code
-.claude/
+# Claude Code: ignore local state (worktrees, local settings) but share the sandbox settings
+.claude/*
+!.claude/settings.json
 
 # macOS
 .DS_Store
