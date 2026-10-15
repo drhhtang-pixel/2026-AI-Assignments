@@ -19,7 +19,7 @@ jobs:
     # Students open PRs from forks and get the submission-format check.
     # PRs from branches of this repo (maintainers, Dependabot) change scripts/
     # or .github/ and would always fail it, so they run the gallery tests instead.
-    # A deleted fork has head.repo == null and is treated as a fork.
+    # If the fork was deleted, head.repo.full_name is empty and the PR is treated as a fork.
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

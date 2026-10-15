@@ -1,0 +1,8 @@
+# Opens PRs when an action in .github/workflows/ has a new release,
+# updating the pinned commit SHA and its trailing "# vX.Y.Z" comment.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
