@@ -14,13 +14,24 @@ jobs:
     name: Validate Submission
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+    # Students open PRs from forks and get the submission-format check.
+    # PRs from branches of this repo (maintainers, Dependabot) change scripts/
+    # or .github/ and would always fail it, so they run the gallery tests instead.
+    # A deleted fork has head.repo == null and is treated as a fork.
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Run validation
+        if: github.event.pull_request.head.repo.full_name != github.repository
         run: node scripts/validate-submission.js
+
+      - name: Run maintenance checks
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: node scripts/test-build-gallery.js
 
   build-and-deploy:
     name: Build Gallery & Deploy
